@@ -3,13 +3,22 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
+import { useParams } from "next/navigation"; // 1. Import useParams
 
 export default function SistemSirkulasiPage() {
+  // 2. Ambil parameter ID dari URL
+  // Jika URL browser adalah /materi/123, maka id = "123"
+  const params = useParams();
+  const id = params.id;
+
+  // Opsi Alternatif: Jika ini halaman statis dan ID untuk Sistem Sirkulasi
+  // di database selalu "1", Anda bisa ganti baris di atas menjadi:
+  // const id = "1";
+
   return (
     <div className="flex flex-col min-h-screen bg-[#FAFAFA] font-sans">
       {/* --- HEADER KHUSUS DETAIL PAGE --- */}
       <header className="relative flex items-center justify-center px-6 py-6 bg-transparent">
-        {/* Tombol Kembali (Absolute di kiri) */}
         <Link
           href="/"
           className="absolute left-6 p-2 -ml-2 rounded-full hover:bg-gray-200 transition"
@@ -17,31 +26,34 @@ export default function SistemSirkulasiPage() {
           <ArrowLeft className="w-6 h-6 text-black" strokeWidth={2.5} />
         </Link>
 
-        {/* Judul Halaman (Centered) */}
         <h1 className="text-xl font-bold text-black">Sistem Sirkulasi</h1>
       </header>
 
       {/* --- KONTEN UTAMA --- */}
       <main className="flex-1 w-full p-6 flex flex-col gap-4">
+        {/* 3. PERBAIKAN HREF:
+            Gunakan tanda backtick (`) dan ${id} untuk menyisipkan variabel.
+        */}
+
         {/* Card 1: Mari Belajar */}
         <ActionCard
           title="Mari Belajar"
-          imageSrc="/materi-bacaan2.png" // Gunakan gambar buku yg sudah ada
-          href="/sistem-sirkulasi/materi-bacaan"
+          imageSrc="/materi-bacaan2.png"
+          href={`/materi/${id}/materi-bacaan`}
         />
 
         {/* Card 2: Ayo Berlatih */}
         <ActionCard
           title="Ayo Berlatih"
-          imageSrc="/soal-latihan.png" // Gunakan gambar kertas ujian yg sudah ada
-          href="/sistem-sirkulasi/soal-latihan"
+          imageSrc="/soal-latihan.png"
+          href={`/materi/${id}/soal-latihan`}
         />
 
         {/* Card 3: Review Jawaban */}
         <ActionCard
           title="Review Jawaban"
-          imageSrc="/review-jawaban.png" // Perlu gambar baru (checklist hijau)
-          href="/sistem-sirkulasi/review"
+          imageSrc="/review-jawaban.png"
+          href={`/materi/${id}/review`}
         />
       </main>
     </div>
@@ -68,7 +80,6 @@ function ActionCard({
 
         {/* Area Teks (Kanan) */}
         <div className="flex-1">
-          {/* Memecah text jadi 2 baris jika perlu, atau render langsung */}
           <h2 className="text-lg font-bold text-black leading-tight">
             {title.split(" ").map((word, i) => (
               <span key={i} className="block">

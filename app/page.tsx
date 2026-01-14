@@ -1,29 +1,44 @@
 "use client";
 
-import { useState } from "react";
-import HomeHeader from "@/components/homeHeader"; // Pastikan path import sesuai
+import { useState, useEffect } from "react";
+import HomeHeader from "@/components/homeHeader";
 import Image from "next/image";
 import { Search, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-// --- DATA STATIS UNTUK PENCARIAN ---
-const SEARCH_DATA = ["Sistem Sirkulasi"];
+import { createClient } from "@/utils/supabase-client";
+import { getSubjects } from "@/utils/supabase-queries";
+import { Subject } from "@/types/database";
 
 export default function Home() {
-  // State untuk menangani input dan dropdown
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [filteredData, setFilteredData] = useState<string[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [filteredData, setFilteredData] = useState<Subject[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleSelectItem = (item: string) => {
-    setQuery(item);
+  // Fetch subjects from Supabase
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      try {
+        const supabase = createClient();
+        const data = await getSubjects(supabase);
+        setSubjects(data);
+      } catch (error) {
+        console.error("Error fetching subjects:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubjects();
+  }, []);
+
+  const handleSelectItem = (subject: Subject) => {
+    setQuery(subject.name);
     setShowDropdown(false);
-
-    // 3. Tambahkan logika navigasi
-    if (item === "Sistem Sirkulasi") {
-      router.push("/sistem-sirkulasi");
-    }
+    // Navigate to subject page
+    router.push(`/materi/${subject.id}`);
   };
 
   // Fungsi saat user mengetik
@@ -32,9 +47,9 @@ export default function Home() {
     setQuery(value);
 
     if (value.length > 0) {
-      // Filter data berdasarkan input (case insensitive)
-      const filtered = SEARCH_DATA.filter((item) =>
-        item.toLowerCase().includes(value.toLowerCase())
+      // Filter subjects berdasarkan input (case insensitive)
+      const filtered = subjects.filter((subject) =>
+        subject.name.toLowerCase().includes(value.toLowerCase())
       );
       setFilteredData(filtered);
       setShowDropdown(true);
@@ -57,10 +72,9 @@ export default function Home() {
             type="text"
             value={query}
             onChange={handleSearchChange}
-            placeholder="Cari materi..."
-            className="w-full h-12 pl-5 pr-12 rounded-xl border border-slate-300 shadow-sm transition focus:ring-2 focus:ring-green-400 outline-none text-gray-700 bg-white"
-            // Opsional: Tutup dropdown saat focus hilang (perlu handling click event agar tidak bentrok)
-            // onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+            placeholder={loading ? "Loading..." : "Cari materi..."}
+            disabled={loading}
+            className="w-full h-12 pl-5 pr-12 rounded-xl border border-slate-300 shadow-sm transition focus:ring-2 focus:ring-green-400 outline-none text-gray-700 bg-white disabled:bg-gray-50 disabled:cursor-not-allowed"
           />
           <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
             <Search className="w-6 h-6 text-black" strokeWidth={2.5} />
@@ -68,16 +82,16 @@ export default function Home() {
 
           {/* --- DROPDOWN HASIL SEARCH --- */}
           {showDropdown && (
-            <div className="absolute top-full mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="absolute top-full mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
               {filteredData.length > 0 ? (
                 <ul>
-                  {filteredData.map((item, index) => (
+                  {filteredData.map((subject) => (
                     <li
-                      key={index}
-                      onClick={() => handleSelectItem(item)}
+                      key={subject.id}
+                      onClick={() => handleSelectItem(subject)}
                       className="px-5 py-3 hover:bg-green-50 cursor-pointer text-gray-700 border-b last:border-none border-gray-50 transition-colors"
                     >
-                      {item}
+                      {subject.name}
                     </li>
                   ))}
                 </ul>
