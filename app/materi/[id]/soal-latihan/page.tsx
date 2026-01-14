@@ -1,94 +1,138 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import HomeHeader from "@/components/homeHeader";
 import Image from "next/image";
 import { ChevronRight, ChevronLeft, X } from "lucide-react";
+import { createClient } from "@/utils/supabase-client";
+import { getPracticeQuestions } from "@/utils/supabase-queries";
+import { PracticeQuestion } from "@/types/database";
+import { useParams } from "next/navigation";
 
-// --- 1. DATA SOAL (DATABASE STATIS) ---
-// Anda bisa mengubah teks, gambar, dan konten flip card untuk setiap soal di sini.
-const QUESTIONS_DATA = [
-  {
-    id: 1,
-    number: 1,
-    text: "Seorang pasien mengalami pendarahan yang berkepanjangan setelah cedera ringan. Hasil tes laboratorium menunjukkan jumlah trombosit yang normal tetapi kadar fibrinogen yang sangat rendah. Analisislah bagaimana kondisi ini memengaruhi mekanisme pembekuan darah dan jelaskan mengapa pendarahan terus berlanjut.",
-    flipImage: "/flip-1.png",
-    flipImageBack: "/flip-1-back.png",
-  },
-  {
-    id: 2,
-    number: 2,
-    text: "Jelaskan perbedaan mendasar antara arteri dan vena dilihat dari struktur dinding, katup, dan arah aliran darahnya. Mengapa pembuluh nadi (arteri) memiliki dinding yang lebih tebal dan elastis dibandingkan pembuluh balik (vena)?",
-    // Data untuk Flip Card Soal 2
-    flipImage: "/flip-2.png",
-    flipImageBack: "/flip-2-back.png",
-  },
-  {
-    id: 3,
-    number: 3,
-    text: "Seorang atlet lari jarak jauh memiliki denyut jantung istirahat yang lebih rendah dibandingkan orang yang jarang berolahraga. Analisislah mengapa hal tersebut bisa terjadi dan hubungannya dengan efisiensi kerja jantung.",
-    flipImage: "/flip-3.png",
-    flipImageBack: "/flip-3-back.png",
-  },
-  {
-    id: 4,
-    number: 4,
-    text: "Eritroblastosis fetalis adalah kelainan darah yang terjadi pada bayi baru lahir. Jelaskan mekanisme terjadinya kelainan tersebut hubungannya dengan Rhesus ibu dan janin!",
-    flipImage: "/flip-4.png",
-    flipImageBack: "/flip-4-back.png",
-  },
-  {
-    id: 5,
-    number: 5,
-    text: "Mengapa orang yang tinggal di pegunungan tinggi cenderung memiliki jumlah eritrosit yang lebih banyak dibandingkan orang yang tinggal di dataran rendah? Jelaskan hubungannya dengan ketersediaan oksigen!",
-    flipImage: "/flip-5.png",
-    flipImageBack: "/flip-5-back.png",
-  },
-  {
-    id: 6,
-    number: 6,
-    text: "Mengapa orang yang tinggal di pegunungan tinggi cenderung memiliki jumlah eritrosit yang lebih banyak dibandingkan orang yang tinggal di dataran rendah? Jelaskan hubungannya dengan ketersediaan oksigen!",
-    flipImage: "/flip-6.png",
-    flipImageBack: "/flip-6-back.png",
-  },
-];
+// --- KOMPONEN SKELETON (UI Loading) ---
+const SkeletonLoader = () => {
+  return (
+    <div className="flex flex-col min-h-screen bg-[#FAFAFA] font-sans">
+      <HomeHeader />
+      <main className="flex-1 w-full px-6 pb-8 flex flex-col animate-pulse">
+        {/* Skeleton Judul */}
+        <div className="w-full flex justify-center mb-4">
+          <div className="w-56 h-32 bg-gray-200 rounded-xl" />
+        </div>
+
+        {/* Skeleton Area Soal */}
+        <div className="flex gap-4 mb-8 min-h-[120px]">
+          {/* Skeleton Nomor */}
+          <div className="flex-shrink-0">
+            <div className="w-12 h-12 bg-gray-200 rounded-lg" />
+          </div>
+          {/* Skeleton Teks Soal (3 baris) */}
+          <div className="flex-1 space-y-3 pt-1">
+            <div className="h-4 bg-gray-200 rounded w-full" />
+            <div className="h-4 bg-gray-200 rounded w-11/12" />
+            <div className="h-4 bg-gray-200 rounded w-4/5" />
+          </div>
+        </div>
+
+        {/* Skeleton Area Jawaban */}
+        <div className="flex-1 flex flex-col min-h-[300px] relative">
+          {/* Area Textarea Dummy */}
+          <div className="w-full flex-1 bg-gray-100 rounded-lg border border-gray-200" />
+
+          {/* Skeleton Tombol Bantuan */}
+          <div className="absolute bottom-20 right-0">
+            <div className="w-20 h-20 bg-gray-200 rounded-full opacity-50" />
+          </div>
+
+          {/* Skeleton Navigasi */}
+          <div className="w-full flex justify-between items-center py-4">
+            {/* Tombol Kiri */}
+            <div className="w-12 h-12 bg-gray-200 rounded-full" />
+            {/* Tombol Kanan */}
+            <div className="w-12 h-12 bg-gray-200 rounded-full" />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
 
 export default function LatihanSoalPage() {
-  // --- STATE MANAGEMENT ---
-  const [currentIndex, setCurrentIndex] = useState(0); // 0 = Soal pertama
-  const [answers, setAnswers] = useState<Record<number, string>>({}); // { 1: "Jawab A", 2: "Jawab B" }
+  const params = useParams();
 
-  // State Modal
+  const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [answers, setAnswers] = useState<Record<number, string>>({});
   const [showModal, setShowModal] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
 
-  // Mengambil data soal saat ini berdasarkan index
-  const currentQuestion = QUESTIONS_DATA[currentIndex];
-  const isLastQuestion = currentIndex === QUESTIONS_DATA.length - 1;
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      const idParam = Array.isArray(params?.id) ? params?.id[0] : params?.id;
+
+      if (!idParam) return;
+
+      const parsedId = parseInt(idParam);
+
+      if (isNaN(parsedId)) {
+        console.error("ID Soal tidak valid");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const supabase = createClient();
+        const data = await getPracticeQuestions(supabase, parsedId);
+        setQuestions(data);
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (params?.id) {
+      fetchQuestions();
+    }
+  }, [params?.id]);
+
+  // --- TAMPILKAN SKELETON SAAT LOADING ---
+  if (loading) {
+    return <SkeletonLoader />;
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#FAFAFA] font-sans">
+        <HomeHeader />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-lg text-gray-600">No questions available</div>
+        </main>
+      </div>
+    );
+  }
+
+  const currentQuestion = questions[currentIndex];
 
   // --- HANDLERS ---
-
-  // 1. Simpan jawaban ke State saat mengetik
   const handleAnswerChange = (text: string) => {
     setAnswers((prev) => ({
       ...prev,
-      [currentQuestion.id]: text, // Simpan berdasarkan ID soal
+      [currentQuestion.id]: text,
     }));
   };
 
-  // 2. Navigasi Next
   const handleNext = () => {
-    if (currentIndex < QUESTIONS_DATA.length - 1) {
+    if (currentIndex < questions.length - 1) {
       setCurrentIndex((prev) => prev + 1);
-      setShowModal(false); // Tutup modal jika terbuka
+      setShowModal(false);
       setIsFlipped(false);
     } else {
       alert("Latihan selesai! Jawaban Anda telah tersimpan.");
-      // Di sini bisa tambahkan logika redirect ke halaman hasil
     }
   };
 
-  // 3. Navigasi Previous (Opsional, jika ingin bisa kembali)
   const handlePrev = () => {
     if (currentIndex > 0) {
       setCurrentIndex((prev) => prev - 1);
@@ -122,15 +166,15 @@ export default function LatihanSoalPage() {
 
         {/* --- AREA SOAL DINAMIS --- */}
         <div className="flex gap-4 mb-8 min-h-[120px]">
-          {/* Nomor Soal (Berubah sesuai state) */}
+          {/* Nomor Soal */}
           <div className="flex-shrink-0">
             <div className="w-12 h-12 bg-violet-200 rounded-lg flex items-center justify-center text-3xl font-bold text-gray-700 transition-all duration-300">
               {currentQuestion.number}
             </div>
           </div>
-          {/* Teks Soal (Berubah sesuai state) */}
+          {/* Teks Soal */}
           <p className="text-sm text-gray-800 leading-relaxed text-justify animate-fadeIn">
-            {currentQuestion.text}
+            {currentQuestion.question_text}
           </p>
         </div>
 
@@ -167,7 +211,6 @@ export default function LatihanSoalPage() {
 
           {/* --- NAVIGASI --- */}
           <div className="w-full flex justify-between items-center py-4">
-            {/* Tombol Back (Hanya muncul jika bukan soal nomor 1) */}
             <div className="w-12">
               {currentIndex > 0 && (
                 <button
@@ -179,8 +222,7 @@ export default function LatihanSoalPage() {
               )}
             </div>
 
-            {/* Tombol Next */}
-            {currentIndex === QUESTIONS_DATA.length - 1 ? (
+            {currentIndex === questions.length - 1 ? (
               <button
                 onClick={handleNext}
                 className="bg-red-700 font-bold px-4 py-1 h-max rounded-md hover:bg-red-500"
@@ -199,43 +241,35 @@ export default function LatihanSoalPage() {
         </div>
       </main>
 
+      {/* MODAL (Sama seperti sebelumnya) */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
-          {/* Container Perspective */}
           <div className="relative w-full max-w-sm aspect-[3/4] [perspective:1000px]">
-            {/* Inner Card (Rotator) */}
             <div
               className={`relative w-full h-full transition-all duration-700 [transform-style:preserve-3d] ${
                 isFlipped ? "[transform:rotateY(180deg)]" : ""
               }`}
             >
-              {/* =========================== */}
-              {/* SISI DEPAN (FRONT)          */}
-              {/* =========================== */}
+              {/* SISI DEPAN */}
               <div
                 className={`absolute inset-0 w-full h-full [backface-visibility:hidden] bg-transparent ${
                   isFlipped ? "pointer-events-none" : "z-10"
                 }`}
               >
-                {/* 1. Wrapper Gambar (Rounded & Overflow Hidden disini) */}
                 <div className="relative w-full h-full rounded-xl overflow-hidden shadow-2xl">
                   <Image
-                    src={currentQuestion.flipImage}
+                    src={currentQuestion.flip_image_front}
                     alt="Front Card"
                     fill
                     className="object-fill"
                   />
-
-                  {/* Tombol Close (Di dalam wrapper gambar agar rapi) */}
                   <button
                     onClick={handleCloseModal}
-                    className="absolute top-4 right-4 z-20 p-1 bg-white hover:bg-red-100 rounded-full transition shadow-sm backdrop-blur-md"
+                    className="cursor-pointer absolute top-4 right-4 z-20 p-1 bg-white hover:bg-red-100 rounded-full transition shadow-sm backdrop-blur-md"
                   >
                     <X className="w-6 h-6 text-black" />
                   </button>
                 </div>
-
-                {/* 2. Tombol Putar (Di LUAR wrapper gambar agar bisa menonjol/keluar) */}
                 <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 z-30">
                   <button
                     onClick={() => setIsFlipped(true)}
@@ -246,33 +280,26 @@ export default function LatihanSoalPage() {
                 </div>
               </div>
 
-              {/* =========================== */}
-              {/* SISI BELAKANG (BACK)        */}
-              {/* =========================== */}
+              {/* SISI BELAKANG */}
               <div
                 className={`absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-transparent ${
                   isFlipped ? "z-10" : "pointer-events-none"
                 }`}
               >
-                {/* Wrapper Gambar Belakang */}
                 <div className="relative w-full h-full rounded-xl overflow-hidden shadow-2xl">
                   <Image
-                    src={currentQuestion.flipImageBack}
+                    src={currentQuestion.flip_image_back}
                     alt="Back Card"
                     fill
                     className="object-fill"
                   />
-
-                  {/* Tombol Close */}
                   <button
                     onClick={handleCloseModal}
-                    className="absolute top-4 right-4 z-20 p-1 bg-white hover:bg-red-100 rounded-full transition shadow-sm backdrop-blur-md"
+                    className="cursor-pointer absolute top-4 right-4 z-20 p-1 bg-white hover:bg-red-100 rounded-full transition shadow-sm backdrop-blur-md"
                   >
                     <X className="w-6 h-6 text-black" />
                   </button>
                 </div>
-
-                {/* Tombol Putar Balik (Menonjol di atas juga) */}
                 <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 z-30">
                   <button
                     onClick={() => setIsFlipped(false)}
