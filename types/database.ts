@@ -32,3 +32,10 @@ export interface PracticeQuestion {
   flip_image_front: string; // Mapping dari database: flip_image_front
   flip_image_back: string; // Mapping dari database: flip_image_back
 }
+
+export interface RoleCodeData {
+  id: string;
+  code: string;
+  role_name: string;
+  created_at: string;
+}

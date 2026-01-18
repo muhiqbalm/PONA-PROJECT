@@ -7,7 +7,7 @@ import { User, Home, Info } from "lucide-react";
 
 export default function HomeHeader() {
   return (
-    <header className="w-full flex justify-between items-center py-2 px-6 bg-transparent">
+    <header className="w-full flex justify-between items-center py- px-6 bg-transparent">
       {/* --- BAGIAN KIRI: LOGO --- */}
       <div className="flex-shrink-0">
         <Link href="/">
