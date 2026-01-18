@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css"; // Pastikan tailwind sudah di-setup
+import ToasterContext from "@/components/toastProvider";
 // import { User, Home, Info } from "lucide-react"; // Install lucide-react atau ganti dengan SVG icon biasa
 
 const inter = Inter({ subsets: ["latin"] });
@@ -20,6 +21,7 @@ export default function RootLayout({
       <body
         className={`${inter.className} !bg-[#EEEEEE] min-h-screen flex flex-col items-center justify-center`}
       >
+        <ToasterContext />
         {/* === WRAPPER UTAMA === */}
         {/* Di Mobile: lebar 100%. Di Desktop: lebar max 480px (seukuran HP) */}
         <div className="w-full md:max-w-[420px] flex flex-col items-center">

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import { useParams } from "next/navigation"; // 1. Import useParams
 
-export default function SistemSirkulasiPage() {
+export default function DetailMateriPage() {
   // 2. Ambil parameter ID dari URL
   // Jika URL browser adalah /materi/123, maka id = "123"
   const params = useParams();

@@ -174,7 +174,7 @@ function MenuCard({
 }) {
   return (
     <div
-      className={`${bgColor} cursor-pointer transitions hover:shadow-lg hover:outline-2 hover:outline-green-100 shadow-slate-200 hover:shadow-green-200/50 p-4 rounded-3xl shadow-sm h-44 flex flex-col justify-between relative transition-transform`}
+      className={`${bgColor} transitions shadow-slate-200 p-4 rounded-3xl shadow-sm h-44 flex flex-col justify-between relative transition-transform`}
     >
       <div className="flex justify-center items-center flex-1">
         <div className="relative w-28 h-24">
