@@ -138,7 +138,7 @@ export default function Home() {
         <div className="grid grid-cols-2 gap-4">
           <MenuCard
             title="Materi Bacaan"
-            imageSrc="/materi-bacaan-baru.png"
+            imageSrc="https://aemfbowlzgerzztfryre.supabase.co/storage/v1/object/public/images/materi-bacaan.png"
             bgColor="bg-white"
           />
           <MenuCard
