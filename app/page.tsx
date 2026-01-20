@@ -49,7 +49,7 @@ export default function Home() {
     if (value.length > 0) {
       // Filter subjects berdasarkan input (case insensitive)
       const filtered = subjects.filter((subject) =>
-        subject.name.toLowerCase().includes(value.toLowerCase())
+        subject.name.toLowerCase().includes(value.toLowerCase()),
       );
       setFilteredData(filtered);
       setShowDropdown(true);
@@ -138,7 +138,7 @@ export default function Home() {
         <div className="grid grid-cols-2 gap-4">
           <MenuCard
             title="Materi Bacaan"
-            imageSrc="/materi-bacaan2.png"
+            imageSrc="/materi-bacaan-baru.png"
             bgColor="bg-white"
           />
           <MenuCard
