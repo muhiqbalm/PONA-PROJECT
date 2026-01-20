@@ -36,7 +36,7 @@ export default function HomeHeader() {
         </Link>
 
         {/* Icon Home */}
-        <Link href="/dashboard">
+        <Link href="/">
           <button className="cursor-pointer flex items-center justify-center text-black hover:text-gray-600 transition-colors">
             <Home className="w-7 h-7 stroke-[2]" />
           </button>

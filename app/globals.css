@@ -24,3 +24,36 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* --- GLOBAL SCROLLBAR STYLING --- */
+
+/* 1. Chrome, Edge, Safari, Opera (Webkit) */
+::-webkit-scrollbar {
+  width: 8px; /* Lebar untuk scrollbar vertikal */
+  height: 8px; /* Tinggi untuk scrollbar horizontal */
+}
+
+/* Track (Jalur lintasan scrollbar) */
+::-webkit-scrollbar-track {
+  background: transparent; /* Transparan agar menyatu dengan background */
+  border-radius: 10px;
+}
+
+/* Thumb (Bagian yang bergerak) */
+::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1; /* Warna abu-abu soft (slate-300) */
+  border-radius: 10px; /* Membuat sudut bulat sempurna */
+  border: 2px solid transparent; /* Memberi jarak antara thumb dan track */
+  background-clip: content-box; /* Agar border transparan berfungsi sebagai padding */
+}
+
+/* Thumb saat di-hover (Mouse di atasnya) */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8; /* Sedikit lebih gelap (slate-400) */
+}
+
+/* 2. Firefox (Standard Property) */
+* {
+  scrollbar-width: thin; /* Membuat scrollbar tipis */
+  scrollbar-color: #cbd5e1 transparent; /* Warna thumb dan track */
+}

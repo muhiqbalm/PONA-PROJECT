@@ -136,7 +136,7 @@ export default function ProfilePage() {
 
       {/* Dekorasi Background */}
       <div
-        className={`absolute top-0 left-0 w-full h-44 opacity-10 pointer-events-none ${
+        className={`absolute top-0 left-0 w-full h-40 opacity-10 pointer-events-none ${
           isTeacher ? "bg-purple-600" : "bg-green-600"
         }`}
       />

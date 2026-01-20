@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/utils/supabase-client";
-// Import Toast
 import { toast } from "react-hot-toast";
 import { loginUser } from "@/utils/supabase-queries";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,49 +14,51 @@ export default function LoginPage() {
 
   const [formData, setFormData] = useState({
     nama: "",
-    identitas: "", // Bisa Kelas (Siswa) atau NPP (Guru)
+    identitas: "",
     kode: "",
-    password: "", // Wajib ada untuk auth supabase
+    password: "",
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  // Handle perubahan input
+  // --- MODIFIKASI HANDLE CHANGE ---
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    // Jika field adalah 'nama' atau 'identitas', paksa jadi huruf besar
+    const newValue =
+      name === "nama" || name === "identitas" ? value.toUpperCase() : value;
+
+    setFormData({ ...formData, [name]: newValue });
   };
 
-  // Handle submit form
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Panggil fungsi loginUser dari helper
       const res = await loginUser(
         formData.nama,
         formData.identitas,
         formData.kode,
         formData.password,
-        supabase
+        supabase,
       );
 
       if (res.success) {
-        // Tampilkan Toast Sukses
-        toast.success("Login Berhasil! Masuk ke dashboard...", {
+        toast.success("Login Berhasil!", {
           duration: 2000,
           position: "top-center",
         });
 
-        // Redirect berdasarkan Role
-        // Kita ambil role dari metadata user
         const role = res.data?.user.user_metadata.role;
 
         setTimeout(() => {
           if (role === "TEACHER") {
-            router.push("/dashboard/guru"); // Sesuaikan route dashboard guru
+            router.push("/");
           } else {
-            router.push("/dashboard/siswa"); // Sesuaikan route dashboard siswa
+            router.push("/");
           }
         }, 1500);
       } else {
@@ -72,15 +74,12 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#EDEDED] font-sans px-4">
-      {/* Container Card */}
       <div className="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-sm w-full max-w-[350px] flex flex-col relative">
         {/* Header Section */}
         <div className="flex flex-col items-center text-center mb-8">
-          {/* --- IMAGE FUNBIO --- */}
-          {/* Container relative untuk Next Image */}
           <div className="relative w-24 h-24 mb-2">
             <Image
-              src="/funbioIcon.png" // Pastikan file ada di public folder
+              src="/funbioIcon.png"
               alt="Fun Bio Logo"
               fill
               className="object-contain"
@@ -99,7 +98,7 @@ export default function LoginPage() {
 
         {/* Form Section */}
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
-          {/* Input Nama */}
+          {/* Input Nama (Auto Capitalize) */}
           <div className="relative">
             <input
               type="text"
@@ -112,7 +111,7 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Input Identitas (Kelas / NPP) */}
+          {/* Input Identitas (Auto Capitalize) */}
           <div className="relative">
             <input
               type="text"
@@ -138,20 +137,26 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Input Password (WAJIB ADA UNTUK AUTH) */}
+          {/* Input Password dengan Toggle Icon */}
           <div className="relative">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="password"
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-6 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all"
+              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-6 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all pr-12"
               required
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
 
-          {/* Button Login */}
           <button
             type="submit"
             disabled={isLoading}
@@ -161,7 +166,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Link to Register */}
         <div className="mt-6 text-center">
           <p className="text-xs text-gray-400 font-medium">
             Belum punya akun?{" "}

@@ -7,7 +7,7 @@ import ToasterContext from "@/components/toastProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Mobile Layout App",
+  title: "FUNBIO",
   description: "Responsive mobile web view",
 };
 
