@@ -81,7 +81,7 @@ export default function LatihanSoalPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // --- LOGIC SIMPAN ---
-  const saveAnswerToDb = async (questionId: number, answerText: string) => {
+  const saveAnswerToDb = async (questionId: string, answerText: string) => {
     if (!user || hasSubmitted) return;
     if (!answerText || answerText.trim() === "") return;
 

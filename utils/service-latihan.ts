@@ -4,7 +4,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 export const fetchExistingAnswers = async (
   supabase: SupabaseClient,
   userId: string,
-  questionIds: number[],
+  questionIds: string[],
 ) => {
   const { data, error } = await supabase
     .from("student_responses")
