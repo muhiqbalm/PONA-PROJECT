@@ -80,7 +80,7 @@ export default function TeacherDashboardHome() {
             />
           </Link>
           {/* Menu 2: Daftar Siswa */}
-          <Link href="/dashboard/siswa" className="block w-full">
+          <Link href="/dashboard/daftar-siswa" className="block w-full">
             <DashboardMenuCardWide
               title="Daftar Siswa"
               icon={<Users size={32} className="text-white" strokeWidth={2} />}
