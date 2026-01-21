@@ -70,7 +70,7 @@ export default function MateriPage() {
     fetchData();
   }, [params]);
 
-  // Scroll to top
+  // Scroll to top saat pindah slide
   useEffect(() => {
     if (mainRef.current) {
       mainRef.current.scrollTop = 0;
@@ -89,7 +89,7 @@ export default function MateriPage() {
     }
   };
 
-  // --- LOGIKA SMART LIST ---
+  // --- LOGIKA SMART LIST (BULLET/STRIP TEXT) ---
   const renderSmartListItem = (item: string, index: number) => {
     const isStrip = item.trim().match(/^-\s/);
     const isBullet = item.trim().match(/^o\s/);
@@ -188,14 +188,13 @@ export default function MateriPage() {
               );
             }
 
-            // --- PARAGRAPH (PERBAIKAN DI SINI) ---
+            // --- PARAGRAPH ---
             if (block.type === "paragraph") {
               const parts = block.text.split(/(\*\*.*?\*\*)/g);
               return (
                 <p
                   key={index}
                   style={block.style}
-                  // TAMBAHKAN CLASS: whitespace-pre-line
                   className="text-sm text-gray-700 leading-relaxed text-justify whitespace-pre-line"
                 >
                   {parts.map((part, i) =>
@@ -288,22 +287,25 @@ export default function MateriPage() {
               );
             }
 
-            // --- GREEN LIST ---
+            // --- GREEN LIST (Bullet list dengan angka di container hijau) ---
             if (block.type === "green-list") {
-              const listNum = block.number ? block.number : index + 1;
+              // Gunakan block.number jika ada, jika tidak gunakan index+1 sebagai fallback
+              const listNum =
+                block.number !== undefined ? block.number : index + 1;
               const hasText = block.text && block.text.trim().length > 0;
 
               return (
                 <div
                   key={index}
                   style={block.style}
-                  className={`flex gap-3 ${
+                  className={`flex gap-3 my-2 ${
                     hasText ? "items-start" : "items-center"
                   }`}
                 >
+                  {/* Container Hijau untuk Angka/Icon */}
                   <div className={`flex-shrink-0 ${hasText ? "mt-0.5" : ""}`}>
                     {block.icon ? (
-                      <div className="relative w-10 h-10">
+                      <div className="relative w-8 h-8">
                         <Image
                           src={block.icon}
                           alt={`Point ${listNum}`}
@@ -312,11 +314,13 @@ export default function MateriPage() {
                         />
                       </div>
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-[#C8E6C9] border border-[#A5D6A7] flex items-center justify-center text-green-900 font-bold text-sm shadow-sm font-sans">
+                      <div className="w-7 h-7 rounded-full bg-green-100 border border-green-200 flex items-center justify-center text-green-700 font-bold text-xs shadow-sm font-sans">
                         {listNum}
                       </div>
                     )}
                   </div>
+
+                  {/* Konten Text */}
                   <div className="flex-1 min-w-0">
                     {block.title && (
                       <h3
@@ -337,7 +341,7 @@ export default function MateriPage() {
               );
             }
 
-            // --- SMART LIST ---
+            // --- SMART LIST (Auto Bullet/Strip) ---
             if (block.type === "smart-list") {
               return (
                 <ul
@@ -350,7 +354,7 @@ export default function MateriPage() {
               );
             }
 
-            // --- BULLET LIST ---
+            // --- BULLET LIST (Standard) ---
             if (block.type === "bullet-list") {
               return (
                 <ul
@@ -386,7 +390,7 @@ export default function MateriPage() {
         </div>
       </main>
 
-      {/* FOOTER */}
+      {/* FOOTER NAVIGASI */}
       <div className="flex-shrink-0 w-full bg-white border-t border-gray-100 p-4 flex justify-between items-center z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
         <button
           onClick={handlePrev}
@@ -415,7 +419,7 @@ export default function MateriPage() {
         </button>
       </div>
 
-      {/* MODAL */}
+      {/* MODAL ZOOM GAMBAR */}
       {selectedImage && (
         <div
           className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"

@@ -13,14 +13,14 @@ import {
   Type,
   Image as ImageIcon,
   Video,
-  List,
-  CheckCircle,
+  List, // Icon List biasa
   MoreHorizontal,
   Loader2,
   X,
   UploadCloud,
   ExternalLink,
   Layout,
+  Hash,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
@@ -31,15 +31,15 @@ import { createClient } from "@/utils/supabase-client";
 import { getReadingMaterials } from "@/utils/supabase-queries";
 import { ContentBlock } from "@/app/(protected)/materi/[id]/materi-bacaan/page";
 
-// --- PERUBAHAN 1: Tipe ID jadi string (UUID) ---
+// --- TYPES ---
 interface MaterialSlide {
-  id?: string; // UUID adalah string
-  subject_id?: string; // Foreign Key UUID juga string
+  id?: string;
+  subject_id?: string;
   title: string;
   content: ContentBlock[];
 }
 
-// --- SUB-COMPONENT: MEDIA UPLOADER (Tetap sama) ---
+// --- SUB-COMPONENT: MEDIA UPLOADER ---
 const BlockMediaUploader = ({
   type,
   src,
@@ -157,8 +157,6 @@ export default function GuruManageMateriPage() {
   const { user } = useAuth();
   const supabase = createClient();
 
-  // --- PERUBAHAN 2: Hapus parseInt() ---
-  // UUID berisi huruf, parseInt akan menghasilkan NaN
   const subjectId = params?.id ? String(params.id) : "";
 
   // --- STATE ---
@@ -177,11 +175,11 @@ export default function GuruManageMateriPage() {
       if (!subjectId) return;
       setIsLoading(true);
       try {
-        const data = await getReadingMaterials(supabase, subjectId); // Pastikan fungsi ini menerima string ID
+        const data = await getReadingMaterials(supabase, subjectId);
         if (data && data.length > 0) {
           const formattedData = data.map((item: any) => ({
-            id: item.id, // UUID string
-            subject_id: item.subject_id, // UUID string
+            id: item.id,
+            subject_id: item.subject_id,
             title: item.title,
             content: item.content || [],
           }));
@@ -258,9 +256,23 @@ export default function GuruManageMateriPage() {
     };
 
     if (type === "sub-header") newBlock.text = "Sub Header";
+
+    // Logic Auto Numbering untuk Green List
     if (type === "green-list") {
+      const existingGreenLists = updated[currentSlideIndex].content.filter(
+        (b) => b.type === "green-list",
+      );
+
+      // @ts-ignore
+      const lastNumber =
+        existingGreenLists.length > 0
+          ? (existingGreenLists[existingGreenLists.length - 1] as any).number ||
+            existingGreenLists.length
+          : 0;
+
       newBlock.title = "Important Point";
       newBlock.text = "Description...";
+      newBlock.number = lastNumber + 1;
     }
 
     updated[currentSlideIndex].content.push(newBlock);
@@ -313,7 +325,7 @@ export default function GuruManageMateriPage() {
           subject_id: subjectId,
           title: slide.title,
           content: slide.content,
-          order_number: index + 1, // Order number tetap integer, tidak perlu diubah ke UUID
+          order_number: index + 1,
         };
 
         if (slide.id) {
@@ -325,7 +337,7 @@ export default function GuruManageMateriPage() {
           const { data } = await supabase
             .from("reading_materials")
             .insert(payload)
-            .select() // Penting: Supabase akan return object dengan UUID baru
+            .select()
             .single();
 
           if (data) {
@@ -348,13 +360,14 @@ export default function GuruManageMateriPage() {
     }
   };
 
-  // --- RENDER BLOCK EDITOR (Sama Saja) ---
+  // --- RENDER BLOCK EDITOR ---
   const renderBlockEditor = (block: ContentBlock, index: number) => {
     return (
       <div
         key={index}
         className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-4 relative animate-in fade-in slide-in-from-bottom-2"
       >
+        {/* Block Header Controls */}
         <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <span className="bg-gray-100 text-gray-500 p-1.5 rounded-md">
@@ -362,10 +375,17 @@ export default function GuruManageMateriPage() {
               {block.type === "paragraph" && <MoreHorizontal size={14} />}
               {block.type === "image" && <ImageIcon size={14} />}
               {block.type === "video" && <Video size={14} />}
-              {block.type.includes("list") && <List size={14} />}
+              {block.type.includes("bullet-list") && <List size={14} />}
+
+              {/* Green List Icon - List Hijau */}
+              {block.type === "green-list" && (
+                <List size={14} className="text-green-600" />
+              )}
             </span>
             <span className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">
-              {block.type.replace("-", " ")}
+              {block.type === "green-list"
+                ? "NUMBER LIST"
+                : block.type.replace("-", " ")}
             </span>
           </div>
 
@@ -392,6 +412,7 @@ export default function GuruManageMateriPage() {
           </div>
         </div>
 
+        {/* Block Inputs */}
         <div className="space-y-3">
           {(block.type === "sub-header" || block.type === "paragraph") && (
             <textarea
@@ -437,19 +458,43 @@ export default function GuruManageMateriPage() {
             </div>
           )}
 
+          {/* GREEN LIST EDITOR UPDATED */}
           {block.type === "green-list" && (
             <div className="bg-green-50 p-3 rounded-lg border border-green-100 space-y-2">
-              <input
-                type="text"
-                value={block.title || ""}
-                onChange={(e) => updateBlock(index, "title", e.target.value)}
-                className="w-full p-2 border border-green-200 rounded bg-white text-sm font-bold placeholder:text-green-700/50"
-                placeholder="Point Title (Optional)"
-              />
+              <div className="flex gap-2">
+                {/* Input Number - Small Box */}
+                <div className="w-16 flex-shrink-0">
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none text-green-600">
+                      <Hash size={12} />
+                    </div>
+                    <input
+                      type="number"
+                      value={block.number || 1}
+                      onChange={(e) =>
+                        updateBlock(index, "number", parseInt(e.target.value))
+                      }
+                      className="w-full p-2 pl-6 border border-green-200 rounded bg-white text-sm font-bold text-center placeholder:text-green-700/50 focus:ring-1 focus:ring-green-400 outline-none"
+                      placeholder="#"
+                    />
+                  </div>
+                </div>
+
+                {/* Input Title */}
+                <input
+                  type="text"
+                  value={block.title || ""}
+                  onChange={(e) => updateBlock(index, "title", e.target.value)}
+                  className="flex-1 p-2 border border-green-200 rounded bg-white text-sm font-bold placeholder:text-green-700/50 focus:ring-1 focus:ring-green-400 outline-none"
+                  placeholder="Point Title (Optional)"
+                />
+              </div>
+
+              {/* Input Description */}
               <textarea
                 value={block.text}
                 onChange={(e) => updateBlock(index, "text", e.target.value)}
-                className="w-full p-2 border border-green-200 rounded bg-white text-sm h-24 placeholder:text-green-700/50"
+                className="w-full p-2 border border-green-200 rounded bg-white text-sm h-24 placeholder:text-green-700/50 focus:ring-1 focus:ring-green-400 outline-none resize-none"
                 placeholder="Description..."
               />
             </div>
@@ -471,6 +516,7 @@ export default function GuruManageMateriPage() {
       <div className="flex-shrink-0 z-30 bg-white shadow-sm">
         <HomeHeader />
 
+        {/* --- HEADER CONTROLS --- */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
           <Link
             href={`/dashboard/materi`}
@@ -488,6 +534,7 @@ export default function GuruManageMateriPage() {
               <Trash2 size={20} />
             </button>
 
+            {/* ADD BUTTON */}
             <button
               onClick={() => setIsAddBlockModalOpen(true)}
               className="p-2 rounded-full text-violet-600 bg-violet-50 hover:bg-violet-100 border border-violet-200 active:scale-95 transition"
@@ -496,6 +543,7 @@ export default function GuruManageMateriPage() {
               <Plus size={20} />
             </button>
 
+            {/* Save Button */}
             <button
               onClick={handleSaveAll}
               disabled={isSaving}
@@ -511,6 +559,7 @@ export default function GuruManageMateriPage() {
           </div>
         </div>
 
+        {/* --- HORIZONTAL SLIDE NAVIGATOR --- */}
         <div
           ref={tabsRef}
           className="flex overflow-x-auto gap-2 px-4 py-3 border-b border-gray-100 bg-white no-scrollbar items-center sticky top-0"
@@ -538,11 +587,13 @@ export default function GuruManageMateriPage() {
         </div>
       </div>
 
+      {/* --- MAIN EDITOR AREA --- */}
       <div
         id="editor-container"
         className="flex-1 overflow-y-auto p-4 sm:p-6 bg-gray-50/50"
       >
         <div className="max-w-2xl mx-auto pb-10">
+          {/* Slide Title Input */}
           <div className="mb-6">
             <label className="text-[10px] text-gray-400 font-bold uppercase block mb-1">
               Slide Title {currentSlideIndex + 1}
@@ -556,6 +607,7 @@ export default function GuruManageMateriPage() {
             />
           </div>
 
+          {/* Content Blocks */}
           {slides[currentSlideIndex]?.content.length === 0 ? (
             <div className="text-center py-12 px-4 text-gray-400 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center">
               <Layout size={32} className="mb-2 opacity-50" />
@@ -572,6 +624,7 @@ export default function GuruManageMateriPage() {
         </div>
       </div>
 
+      {/* --- ADD BLOCK MODAL (BOTTOM SHEET) --- */}
       {isAddBlockModalOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm sm:p-4 animate-in fade-in duration-200">
           <div
@@ -621,8 +674,8 @@ export default function GuruManageMateriPage() {
                 color="bg-yellow-50 text-yellow-600 border-yellow-100"
               />
               <BlockOption
-                icon={<CheckCircle size={20} />}
-                label="Info Box"
+                icon={<List size={20} />} // Icon List Hijau di Menu Tambah
+                label="Number List"
                 onClick={() => addBlock("green-list")}
                 color="bg-green-50 text-green-600 border-green-100"
               />
