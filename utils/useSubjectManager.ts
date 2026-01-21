@@ -49,7 +49,7 @@ export const useSubjectManager = () => {
   }, [subjects, searchQuery]);
 
   // --- LOGIC: VALIDASI ---
-  const validateName = (name: string, excludeId?: number): boolean => {
+  const validateName = (name: string, excludeId?: string): boolean => {
     const trimmed = name.trim();
     if (!trimmed) {
       toast.error("Nama materi tidak boleh kosong");
