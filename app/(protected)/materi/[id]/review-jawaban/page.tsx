@@ -70,10 +70,10 @@ export default function ReviewPage() {
 
   // State Data Jawaban
   const [originalAnswers, setOriginalAnswers] = useState<
-    Record<number, string>
+    Record<string, string>
   >({});
   const [additionalAnswers, setAdditionalAnswers] = useState<
-    Record<number, string>
+    Record<string, string>
   >({});
 
   // State Editing Jawaban Tambahan

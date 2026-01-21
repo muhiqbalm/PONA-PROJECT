@@ -9,15 +9,15 @@ export type ContentBlock =
 
 // 1. Subject (Disederhanakan)
 export interface Subject {
-  id: number;
+  id: string;
   name: string;
   created_at: string;
 }
 
 // 2. Reading Material
 export interface ReadingMaterial {
-  id: number;
-  subject_id: number;
+  id: string;
+  subject_id: string;
   title: string;
   order_number: number;
   content: ContentBlock[]; // Otomatis mapping dari JSONB ke array ini
@@ -25,8 +25,8 @@ export interface ReadingMaterial {
 
 // 3. Practice Question
 export interface PracticeQuestion {
-  id: number;
-  subject_id: number;
+  id: string;
+  subject_id: string;
   number: number;
   question_text: string;
   flip_image_front: string; // Mapping dari database: flip_image_front

@@ -83,7 +83,7 @@ export default function DetailMateriPage() {
       <main className="flex-1 w-full p-6 flex flex-col gap-4">
         <ActionCard
           title="Mari Belajar"
-          imageSrc="/materi-bacaan2.png"
+          imageSrc="https://aemfbowlzgerzztfryre.supabase.co/storage/v1/object/public/images/materi-bacaan.png"
           href={`/materi/${id}/materi-bacaan`}
         />
 

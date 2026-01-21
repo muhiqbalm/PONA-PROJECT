@@ -73,7 +73,7 @@ export const submitFinalQuiz = async (
 export const updateAdditionalAnswer = async (
   supabase: SupabaseClient,
   userId: string,
-  questionId: number,
+  questionId: string,
   text: string,
 ) => {
   const { error } = await supabase
@@ -92,7 +92,7 @@ export const updateAdditionalAnswer = async (
 export const fetchReviewData = async (
   supabase: SupabaseClient,
   userId: string,
-  questionIds: number[],
+  questionIds: string[],
 ) => {
   const { data, error } = await supabase
     .from("student_responses")

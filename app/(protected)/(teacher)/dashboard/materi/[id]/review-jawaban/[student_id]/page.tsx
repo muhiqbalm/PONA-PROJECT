@@ -10,6 +10,10 @@ import {
   Loader2,
   X,
   StickyNote,
+  Key,
+  ListChecks, // Icon untuk Rubrik
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
@@ -19,6 +23,14 @@ import HomeHeader from "@/components/homeHeader";
 import { createClient } from "@/utils/supabase-client";
 import { PracticeQuestion } from "@/types/database";
 import { getPracticeQuestions } from "@/utils/supabase-queries";
+
+// Interface untuk Rubrik
+interface RubricItem {
+  id: number;
+  question_id: number;
+  score: number;
+  description: string;
+}
 
 export default function GuruReviewStudentPage() {
   const params = useParams();
@@ -34,13 +46,25 @@ export default function GuruReviewStudentPage() {
   // --- STATE ---
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
 
-  // State Jawaban
-  const [studentAnswers, setStudentAnswers] = useState<Record<number, string>>(
+  // State Jawaban Siswa
+  const [studentAnswers, setStudentAnswers] = useState<Record<string, string>>(
     {},
   );
   const [studentAdditionalAnswers, setStudentAdditionalAnswers] = useState<
-    Record<number, string>
+    Record<string, string>
   >({});
+
+  // State Kunci Jawaban
+  const [answerKeys, setAnswerKeys] = useState<Record<string, string>>({});
+
+  // State Rubrik Skor (BARU)
+  // Menyimpan array rubrik untuk setiap question_id
+  const [rubricsMap, setRubricsMap] = useState<Record<string, RubricItem[]>>(
+    {},
+  );
+
+  // State UI: Toggle Rubrik (buka/tutup)
+  const [isRubricOpen, setIsRubricOpen] = useState(false);
 
   const [studentInfo, setStudentInfo] = useState<{
     name: string;
@@ -53,6 +77,11 @@ export default function GuruReviewStudentPage() {
   // State Modal Flip Card
   const [showModal, setShowModal] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
+
+  // Reset Rubrik toggle saat pindah soal
+  useEffect(() => {
+    setIsRubricOpen(false);
+  }, [currentIndex]);
 
   // --- FETCH DATA ---
   useEffect(() => {
@@ -86,16 +115,15 @@ export default function GuruReviewStudentPage() {
         );
         setQuestions(questionsData);
 
-        // 3. Ambil Jawaban Siswa
         if (questionsData.length > 0) {
+          const questionIds = questionsData.map((q) => q.id);
+
+          // 3. Ambil Jawaban Siswa
           const { data: answersData } = await supabase
             .from("student_responses")
             .select("question_id, answer_text, additional_answer")
             .eq("student_id", studentIdParam)
-            .in(
-              "question_id",
-              questionsData.map((q) => q.id),
-            );
+            .in("question_id", questionIds);
 
           if (answersData) {
             const ansMap: Record<number, string> = {};
@@ -108,6 +136,38 @@ export default function GuruReviewStudentPage() {
 
             setStudentAnswers(ansMap);
             setStudentAdditionalAnswers(addAnsMap);
+          }
+
+          // 4. Ambil Kunci Jawaban
+          const { data: keysData } = await supabase
+            .from("answer_keys")
+            .select("question_id, answer")
+            .in("question_id", questionIds);
+
+          if (keysData) {
+            const keyMap: Record<number, string> = {};
+            keysData.forEach((item) => {
+              keyMap[item.question_id] = item.answer;
+            });
+            setAnswerKeys(keyMap);
+          }
+
+          // 5. Ambil Rubrik Skor (BARU)
+          const { data: rubricsData } = await supabase
+            .from("scoring_rubrics")
+            .select("id, question_id, score, description")
+            .in("question_id", questionIds)
+            .order("score", { ascending: true }); // Urutkan skor 1, 2, 3...
+
+          if (rubricsData) {
+            const rMap: Record<number, RubricItem[]> = {};
+            rubricsData.forEach((item) => {
+              if (!rMap[item.question_id]) {
+                rMap[item.question_id] = [];
+              }
+              rMap[item.question_id].push(item);
+            });
+            setRubricsMap(rMap);
           }
         }
       } catch (error) {
@@ -169,6 +229,8 @@ export default function GuruReviewStudentPage() {
   const currentQuestion = questions[currentIndex];
   const currentAnswer = studentAnswers[currentQuestion.id] || "";
   const currentAdditional = studentAdditionalAnswers[currentQuestion.id] || "";
+  const currentKey = answerKeys[currentQuestion.id] || "";
+  const currentRubrics = rubricsMap[currentQuestion.id] || []; // Ambil rubrik soal ini
 
   return (
     <div className="flex flex-col h-screen bg-[#FAFAFA] font-sans overflow-hidden">
@@ -179,26 +241,23 @@ export default function GuruReviewStudentPage() {
 
       {/* Main Content Scrollable */}
       <main className="flex-1 w-full px-6 flex flex-col overflow-y-auto pb-4 relative">
-        {/* --- HEADER UPDATE --- */}
-        <div className="flex items-center gap-2 pt-2 mb-6">
+        {/* --- HEADER --- */}
+        <div className="flex items-center gap-3 pt-2 mb-6">
           <Link
             href={`/dashboard/materi/${subjectIdParam}/review-jawaban`}
-            className="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-gray-900 transition-all active:scale-95 flex-shrink-0"
+            className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-full shadow-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-95 flex-shrink-0"
           >
             <ArrowLeft size={20} strokeWidth={2.5} />
           </Link>
 
           <div className="flex-1 min-w-0 flex flex-col justify-center">
-            {/* LABEL ATAS */}
-            <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider leading-tight">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-tight">
               Review Jawaban Siswa
             </p>
-
-            {/* NAMA DAN KELAS SEJAJAR */}
             <div className="flex items-center gap-2 mt-0.5">
-              <h4 className="text-base font-extrabold text-gray-800 leading-none truncate">
+              <h2 className="text-lg font-black text-gray-800 leading-none truncate">
                 {studentInfo?.name || "Nama Siswa"}
-              </h4>
+              </h2>
               <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-100 flex-shrink-0">
                 {studentInfo?.class || "-"}
               </span>
@@ -207,7 +266,7 @@ export default function GuruReviewStudentPage() {
         </div>
 
         {/* AREA SOAL */}
-        <div className="flex gap-4 mb-6 min-h-[100px] flex-shrink-0">
+        <div className="flex gap-4 mb-4 min-h-[100px] flex-shrink-0">
           <div className="flex-shrink-0">
             <div className="w-12 h-12 bg-violet-200 rounded-lg flex items-center justify-center text-3xl font-bold text-gray-700">
               {currentQuestion.number}
@@ -218,9 +277,9 @@ export default function GuruReviewStudentPage() {
           </p>
         </div>
 
-        {/* === AREA 1: JAWABAN SISWA (UI KERTAS BERGARIS) === */}
-        <div className="mb-8 relative flex flex-col min-h-[150px] flex-1 flex-shrink-0">
-          <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">
+        {/* === AREA 1: JAWABAN SISWA === */}
+        <div className="mb-6 relative flex flex-col min-h-[150px] flex-1 flex-shrink-0">
+          <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider pl-1">
             Jawaban Siswa:
           </label>
 
@@ -237,7 +296,7 @@ export default function GuruReviewStudentPage() {
             placeholder="Siswa tidak menjawab soal ini."
           />
 
-          {/* TOMBOL LIHAT KUNCI / BANTUAN */}
+          {/* TOMBOL FLIP CARD */}
           <div
             onClick={() => setShowModal(true)}
             className="absolute bottom-0 right-0 cursor-pointer hover:scale-105 transition-transform z-10"
@@ -253,22 +312,95 @@ export default function GuruReviewStudentPage() {
           </div>
         </div>
 
-        {/* === AREA 2: JAWABAN TAMBAHAN (READ ONLY) === */}
+        {/* === AREA 3: JAWABAN TAMBAHAN (READ ONLY) === */}
         <div className="flex-1 flex flex-col min-h-[120px]">
           <div className="flex items-center justify-between mb-2">
-            <label className="flex items-center gap-2 text-xs font-bold text-green-600 uppercase tracking-wider">
-              <StickyNote size={14} /> Review Jawaban Siswa
+            <label className="flex items-center gap-2 text-xs font-bold text-green-600 uppercase tracking-wider pl-1">
+              <StickyNote size={14} /> Catatan Tambahan Siswa
             </label>
           </div>
 
-          <div className="relative rounded-xl border-2 border-green-100 bg-green-50/50 h-[160px] p-4 overflow-y-auto">
+          <div className="relative rounded-xl border-2 border-green-100 bg-green-50/50 h-[160px] p-4 overflow-y-auto shadow-sm">
             {currentAdditional ? (
               <p className="text-gray-700 whitespace-pre-wrap leading-relaxed text-sm">
                 {currentAdditional}
               </p>
             ) : (
               <p className="text-gray-400 italic text-sm">
-                Tidak ada review jawaban dari siswa.
+                Tidak ada catatan tambahan dari siswa.
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* === TOMBOL TOGGLE RUBRIK === */}
+        <div className="mt-4">
+          <button
+            onClick={() => setIsRubricOpen(!isRubricOpen)}
+            className="flex items-center gap-2 text-xs font-bold text-violet-600 hover:text-violet-800 transition-colors bg-violet-50 px-3 py-2 rounded-lg w-fit border border-violet-100"
+          >
+            <ListChecks size={16} />
+            {isRubricOpen
+              ? "Sembunyikan Rubrik Penilaian"
+              : "Lihat Rubrik Penilaian"}
+            {isRubricOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </button>
+
+          {/* KONTEN RUBRIK (EXPANDABLE) */}
+          {isRubricOpen && (
+            <div className="mt-3 bg-white border border-violet-100 rounded-xl p-4 shadow-sm animate-in fade-in slide-in-from-top-2 duration-200">
+              {currentRubrics.length > 0 ? (
+                <div className="space-y-3">
+                  {/* HEADER KOLOM (BARU) */}
+                  <div className="flex gap-3 pb-2 border-b border-gray-100">
+                    <span className="w-8 text-center text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                      Skor
+                    </span>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                      Deskripsi
+                    </span>
+                  </div>
+
+                  {/* LIST ITEMS */}
+                  {currentRubrics.map((rubric) => (
+                    <div
+                      key={rubric.id}
+                      className="flex gap-3 text-sm border-b border-gray-50 last:border-0 pb-2 last:pb-0"
+                    >
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-violet-100 text-violet-700 font-bold flex items-center justify-center text-xs">
+                        {rubric.score}
+                      </div>
+                      <p className="text-gray-600 leading-snug pt-1">
+                        {rubric.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-400 italic text-sm">
+                  Belum ada rubrik penilaian untuk soal ini.
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* === AREA 2: KUNCI JAWABAN === */}
+        <div className="flex-shrink-0 mt-4">
+          <div className="flex items-center justify-between mb-2">
+            <label className="flex items-center gap-2 text-xs font-bold text-blue-600 uppercase tracking-wider pl-1">
+              <Key size={14} /> Kunci Jawaban
+            </label>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 shadow-sm">
+            {currentKey ? (
+              <p className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">
+                {currentKey}
+              </p>
+            ) : (
+              <p className="text-gray-400 italic text-sm">
+                Kunci jawaban belum tersedia.
               </p>
             )}
           </div>

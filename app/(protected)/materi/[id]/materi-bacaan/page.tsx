@@ -47,7 +47,7 @@ export default function MateriPage() {
       try {
         const supabase = createClient();
         const rawId = params?.id;
-        const subjectId = rawId ? parseInt(String(rawId)) : 1;
+        const subjectId = String(rawId);
 
         const data = await getReadingMaterials(supabase, subjectId);
 
@@ -127,7 +127,7 @@ export default function MateriPage() {
             </strong>
           ) : (
             part
-          )
+          ),
         )}
       </li>
     );
@@ -205,7 +205,7 @@ export default function MateriPage() {
                       </strong>
                     ) : (
                       part
-                    )
+                    ),
                   )}
                 </p>
               );
@@ -372,7 +372,7 @@ export default function MateriPage() {
                             </strong>
                           ) : (
                             part
-                          )
+                          ),
                         )}
                       </li>
                     );

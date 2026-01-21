@@ -11,13 +11,47 @@ import { Subject } from "@/types/database";
 
 export default function Home() {
   const router = useRouter();
+
   const [query, setQuery] = useState("");
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [filteredData, setFilteredData] = useState<Subject[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Fetch subjects from Supabase
+  // --- 1. LOGIC KHUSUS: Cek apakah user adalah GURU ---
+  // Kita tidak pakai useAuth agar tidak memblokir user yang belum login
+  useEffect(() => {
+    const checkGuruRedirect = async () => {
+      const supabase = createClient();
+
+      // Cek apakah ada sesi login aktif
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      // Jika ada user login, cek role-nya
+      if (session?.user) {
+        try {
+          const { data: userData } = await supabase
+            .from("teachers")
+            .select("*")
+            .eq("id", session.user.id)
+            .single();
+
+          // HANYA jika role guru, kita redirect
+          if (userData) {
+            router.replace("/dashboard");
+          }
+        } catch (error) {
+          console.error("Error checking role:", error);
+        }
+      }
+    };
+
+    checkGuruRedirect();
+  }, [router]);
+
+  // --- 2. Fetch Subjects (Data Materi) ---
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
@@ -37,17 +71,14 @@ export default function Home() {
   const handleSelectItem = (subject: Subject) => {
     setQuery(subject.name);
     setShowDropdown(false);
-    // Navigate to subject page
     router.push(`/materi/${subject.id}`);
   };
 
-  // Fungsi saat user mengetik
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
 
     if (value.length > 0) {
-      // Filter subjects berdasarkan input (case insensitive)
       const filtered = subjects.filter((subject) =>
         subject.name.toLowerCase().includes(value.toLowerCase()),
       );
@@ -60,14 +91,11 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#FAFAFA] font-sans">
-      {/* Header dipanggil di sini */}
       <HomeHeader />
 
-      {/* Main Content mengisi sisa layar */}
       <main className="flex-1 w-full px-6 pb-8 pt-2 overflow-y-auto">
-        {/* 1. SEARCH BAR AREA */}
+        {/* SEARCH BAR AREA */}
         <div className="relative mb-6 z-50">
-          {/* Input Field */}
           <input
             type="text"
             value={query}
@@ -80,7 +108,7 @@ export default function Home() {
             <Search className="w-6 h-6 text-black" strokeWidth={2.5} />
           </div>
 
-          {/* --- DROPDOWN HASIL SEARCH --- */}
+          {/* DROPDOWN HASIL SEARCH */}
           {showDropdown && (
             <div className="absolute top-full mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
               {filteredData.length > 0 ? (
@@ -104,10 +132,8 @@ export default function Home() {
           )}
         </div>
 
-        {/* 2. HERO BANNER */}
-        {/* Tambahkan z-0 agar tidak menutupi dropdown jika dropdown sangat panjang */}
+        {/* HERO BANNER */}
         <div className="relative w-full h-44 rounded-3xl overflow-hidden shadow-sm bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 flex items-center mb-6 z-0">
-          {/* Teks Kiri */}
           <div className="w-1/2 pl-6 z-10">
             <h2 className="font-bold text-lg leading-tight text-black mb-2">
               FunBio <br />
@@ -119,7 +145,6 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Gambar Kanan (Blood Cells) */}
           <div className="absolute right-0 top-0 h-full w-2/5">
             <Image
               src="/blood-cells.png"
@@ -131,10 +156,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 3. SECTION TITLE */}
+        {/* SECTION TITLE */}
         <h3 className="font-bold text-lg text-black mb-4">Featured FunBio</h3>
 
-        {/* 4. GRID MENU (4 KOTAK) */}
+        {/* GRID MENU */}
         <div className="grid grid-cols-2 gap-4">
           <MenuCard
             title="Materi Bacaan"

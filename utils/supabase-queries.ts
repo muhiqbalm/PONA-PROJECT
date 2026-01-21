@@ -23,7 +23,7 @@ export const getSubjects = async (supabase: SupabaseClient) => {
 
 export const getReadingMaterials = async (
   supabase: SupabaseClient,
-  subjectId: number
+  subjectId: string,
 ) => {
   const { data, error } = await supabase
     .from("reading_materials")
@@ -41,7 +41,7 @@ export const getReadingMaterials = async (
 
 export const getPracticeQuestions = async (
   supabase: SupabaseClient,
-  subjectId: number
+  subjectId: number,
 ) => {
   const { data, error } = await supabase
     .from("practice_questions")
@@ -91,7 +91,7 @@ export const registerUser = async (
   identity: string, // Ini generik: Bisa NPP atau Kelas
   code: string,
   password: string,
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
 ) => {
   let email = "";
 
@@ -143,7 +143,7 @@ export const loginUser = async (
   identity: string, // NPP atau Kelas
   code: string,
   password: string,
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
 ) => {
   let email = "";
 

@@ -170,21 +170,21 @@ export default function KelolaMateriPage() {
 
                 <div className="grid grid-cols-3 gap-2">
                   <Link
-                    href={`/dashboard/materi/${subject.id}/content`}
+                    href={`/dashboard/materi/${subject.id}/materi-bacaan`}
                     className="flex flex-col items-center justify-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-600 p-2 rounded-xl transition active:scale-95"
                   >
                     <BookOpen size={20} />
                     <span className="text-[10px] font-bold">Bacaan</span>
                   </Link>
                   <Link
-                    href={`/dashboard/materi/${subject.id}/soal`}
+                    href={`/dashboard/materi/${subject.id}/soal-latihan`}
                     className="flex flex-col items-center justify-center gap-1 bg-purple-50 hover:bg-purple-100 text-purple-600 p-2 rounded-xl transition active:scale-95"
                   >
                     <FileText size={20} />
                     <span className="text-[10px] font-bold">Soal</span>
                   </Link>
                   <Link
-                    href={`/dashboard/materi/${subject.id}/review`}
+                    href={`/dashboard/materi/${subject.id}/review-jawaban`}
                     className="flex flex-col items-center justify-center gap-1 bg-teal-50 hover:bg-teal-100 text-teal-600 p-2 rounded-xl transition active:scale-95"
                   >
                     <ClipboardCheck size={20} />
