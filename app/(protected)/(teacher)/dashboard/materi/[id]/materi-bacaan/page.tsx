@@ -540,7 +540,7 @@ export default function GuruManageMateriPage() {
               className="p-2 rounded-full text-violet-600 bg-violet-50 hover:bg-violet-100 border border-violet-200 active:scale-95 transition"
               title="Add Content"
             >
-              <Plus size={20} />
+              <Plus size={20} /> Konten
             </button>
 
             {/* Save Button */}

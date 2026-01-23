@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
-// 1. Import Icon Eye dan EyeOff
 import { Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/utils/supabase-client";
 import Image from "next/image";
@@ -22,12 +21,9 @@ export default function RegisterPage() {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-
-  // 2. State untuk kontrol visibilitas password
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Handle perubahan input (Auto Capitalize untuk Nama & Identitas)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     const newValue =
@@ -36,21 +32,16 @@ export default function RegisterPage() {
     setFormData({ ...formData, [name]: newValue });
   };
 
-  // Handle submit form
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // 3. VALIDASI: Cek apakah Password & Confirm Password sama
     if (formData.password !== formData.confirmPassword) {
-      toast.error("Password dan Konfirmasi Password tidak cocok!", {
-        icon: "⚠️",
-      });
+      toast.error("Password tidak cocok!", { icon: "⚠️" });
       setIsLoading(false);
       return;
     }
 
-    // Validasi panjang password (Opsional, tapi disarankan)
     if (formData.password.length < 6) {
       toast.error("Password minimal 6 karakter");
       setIsLoading(false);
@@ -87,22 +78,25 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#EDEDED] font-sans px-4 py-6">
-      <div className="bg-white p-8 rounded-[2.5rem] shadow-sm w-full max-w-[350px] flex flex-col relative">
+    // Container Utama: Full screen logic sama seperti Login
+    <div className="min-h-dvh w-full flex flex-col md:items-center md:justify-center bg-white md:bg-[#EDEDED] font-sans">
+      {/* Wrapper Konten: Flex-1 agar mengisi layar mobile, padding disesuaikan */}
+      <div className="flex-1 flex flex-col justify-center px-6 py-4 md:flex-none md:bg-white md:p-10 md:rounded-[2.5rem] md:shadow-sm md:w-full md:max-w-[380px] md:min-h-0">
         {/* Header Section */}
-        <div className="flex flex-col items-center text-center mb-6">
-          <div className="relative w-24 h-24 mb-4">
+        <div className="flex flex-col items-center text-center mb-5 md:mb-6 shrink-0">
+          {/* Logo lebih kecil (w-16) di mobile karena input form lebih banyak */}
+          <div className="relative w-16 h-16 mb-2 md:w-24 md:h-24">
             <Image
               src="/funbioIcon.png"
               alt="Fun Bio Logo"
               fill
               className="object-contain"
               priority
-              sizes="64px"
+              sizes="(max-width: 768px) 100vw, 33vw"
             />
           </div>
 
-          <h1 className="text-4xl font-black text-black mb-2 tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-black text-black mb-1 tracking-tight">
             Register
           </h1>
           <p className="text-gray-500 text-xs md:text-sm font-medium">
@@ -110,8 +104,11 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        {/* Form Section */}
-        <form onSubmit={handleRegister} className="flex flex-col gap-3">
+        {/* Form Section - Gap dirapatkan (gap-2.5) agar muat 5 input + tombol */}
+        <form
+          onSubmit={handleRegister}
+          className="flex flex-col gap-2.5 w-full"
+        >
           {/* Input Nama */}
           <div className="relative">
             <input
@@ -120,7 +117,7 @@ export default function RegisterPage() {
               placeholder="Nama Lengkap"
               value={formData.nama}
               onChange={handleChange}
-              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-6 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all"
+              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-5 py-3 md:px-6 md:py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all"
               required
             />
           </div>
@@ -133,7 +130,7 @@ export default function RegisterPage() {
               placeholder="NPP (Guru) / Kelas (Siswa)"
               value={formData.identitas}
               onChange={handleChange}
-              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-6 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all"
+              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-5 py-3 md:px-6 md:py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all"
               required
             />
           </div>
@@ -146,42 +143,40 @@ export default function RegisterPage() {
               placeholder="Kode"
               value={formData.kode}
               onChange={handleChange}
-              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-6 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all"
+              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-5 py-3 md:px-6 md:py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all"
               required
             />
           </div>
 
-          {/* --- INPUT PASSWORD DENGAN ICON MATA --- */}
+          {/* Input Password */}
           <div className="relative">
             <input
-              type={showPassword ? "text" : "password"} // Toggle tipe input
+              type={showPassword ? "text" : "password"}
               name="password"
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-6 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all pr-12" // pr-12 untuk space icon
+              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-5 py-3 md:px-6 md:py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all pr-12"
               required
             />
-            {/* Tombol Toggle Icon */}
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none"
             >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
 
-          {/* --- INPUT CONFIRM PASSWORD DENGAN ICON MATA --- */}
+          {/* Input Confirm Password */}
           <div className="relative">
             <input
-              type={showConfirmPassword ? "text" : "password"} // Toggle tipe input
+              type={showConfirmPassword ? "text" : "password"}
               name="confirmPassword"
-              placeholder="Confirm Password"
+              placeholder="Confirm Pass"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className={`w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-6 py-3.5 text-sm font-medium outline-none focus:ring-2 transition-all pr-12 ${
-                // Optional: Berikan border merah tipis jika tidak cocok saat mengetik (dan tidak kosong)
+              className={`w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-5 py-3 md:px-6 md:py-3.5 text-sm font-medium outline-none focus:ring-2 transition-all pr-12 ${
                 formData.confirmPassword &&
                 formData.password !== formData.confirmPassword
                   ? "ring-1 ring-red-500 focus:ring-red-500"
@@ -194,21 +189,21 @@ export default function RegisterPage() {
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none"
             >
-              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
 
-          {/* Button Register */}
           <button
             type="submit"
             disabled={isLoading}
-            className="mt-4 w-full bg-white border-[1.5px] border-black text-black font-bold text-sm rounded-full py-3 hover:bg-black hover:text-white transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed uppercase tracking-wide"
+            className="mt-2 w-full bg-white border-[1.5px] border-black text-black font-bold text-sm rounded-full py-3 hover:bg-black hover:text-white transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed uppercase tracking-wide shadow-sm"
           >
             {isLoading ? "MEMPROSES..." : "REGISTER"}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
+        {/* Footer */}
+        <div className="mt-5 md:mt-6 text-center shrink-0">
           <p className="text-xs text-gray-400 font-medium">
             Sudah punya akun?{" "}
             <span

@@ -22,14 +22,10 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // --- MODIFIKASI HANDLE CHANGE ---
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    // Jika field adalah 'nama' atau 'identitas', paksa jadi huruf besar
     const newValue =
       name === "nama" || name === "identitas" ? value.toUpperCase() : value;
-
     setFormData({ ...formData, [name]: newValue });
   };
 
@@ -56,7 +52,7 @@ export default function LoginPage() {
 
         setTimeout(() => {
           if (role === "TEACHER") {
-            router.push("/");
+            router.push("/dashboard");
           } else {
             router.push("/");
           }
@@ -73,11 +69,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#EDEDED] font-sans px-4">
-      <div className="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-sm w-full max-w-[350px] flex flex-col relative">
-        {/* Header Section */}
-        <div className="flex flex-col items-center text-center mb-8">
-          <div className="relative w-24 h-24 mb-2">
+    // Container Utama: Gunakan min-h-dvh untuk mobile browser bar fix
+    // Mobile: bg-white (full screen), Desktop: bg-gray (centered card)
+    <div className="min-h-dvh w-full flex flex-col md:items-center md:justify-center bg-white md:bg-[#EDEDED] font-sans">
+      {/* Wrapper Konten */}
+      <div className="flex-1 flex flex-col justify-center px-6 py-4 md:flex-none md:bg-white md:p-10 md:rounded-[2.5rem] md:shadow-sm md:w-full md:max-w-[380px] md:min-h-0">
+        {/* Header Section - Dibuat lebih compact */}
+        <div className="flex flex-col items-center text-center mb-6 md:mb-8 shrink-0">
+          <div className="relative w-20 h-20 mb-2 md:w-24 md:h-24">
             <Image
               src="/funbioIcon.png"
               alt="Fun Bio Logo"
@@ -88,7 +87,7 @@ export default function LoginPage() {
             />
           </div>
 
-          <h1 className="text-4xl font-black text-black mb-2 tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-black text-black mb-1 tracking-tight">
             Login
           </h1>
           <p className="text-gray-500 text-xs md:text-sm font-medium">
@@ -96,9 +95,9 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Form Section */}
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
-          {/* Input Nama (Auto Capitalize) */}
+        {/* Form Section - Gap dikurangi jadi gap-3 agar muat */}
+        <form onSubmit={handleLogin} className="flex flex-col gap-3 w-full">
+          {/* Input Nama */}
           <div className="relative">
             <input
               type="text"
@@ -106,12 +105,13 @@ export default function LoginPage() {
               placeholder="Nama Lengkap"
               value={formData.nama}
               onChange={handleChange}
-              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-6 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all"
+              // Padding vertical (py) dikurangi sedikit untuk mobile
+              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-5 py-3 md:px-6 md:py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all"
               required
             />
           </div>
 
-          {/* Input Identitas (Auto Capitalize) */}
+          {/* Input Identitas */}
           <div className="relative">
             <input
               type="text"
@@ -119,7 +119,7 @@ export default function LoginPage() {
               placeholder="NPP (Guru) / Kelas (Siswa)"
               value={formData.identitas}
               onChange={handleChange}
-              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-6 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all"
+              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-5 py-3 md:px-6 md:py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all"
               required
             />
           </div>
@@ -132,12 +132,12 @@ export default function LoginPage() {
               placeholder="Kode"
               value={formData.kode}
               onChange={handleChange}
-              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-6 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all"
+              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-5 py-3 md:px-6 md:py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all"
               required
             />
           </div>
 
-          {/* Input Password dengan Toggle Icon */}
+          {/* Input Password */}
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -145,7 +145,7 @@ export default function LoginPage() {
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-6 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all pr-12"
+              className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-5 py-3 md:px-6 md:py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all pr-12"
               required
             />
             <button
@@ -153,20 +153,21 @@ export default function LoginPage() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none"
             >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="mt-4 w-full bg-white border-[1.5px] border-black text-black font-bold text-sm rounded-full py-3 hover:bg-black hover:text-white transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed uppercase tracking-wide"
+            className="mt-2 w-full bg-white border-[1.5px] border-black text-black font-bold text-sm rounded-full py-3 hover:bg-black hover:text-white transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed uppercase tracking-wide shadow-sm"
           >
             {isLoading ? "MEMERIKSA..." : "LOGIN"}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
+        {/* Footer - Margin top otomatis (mt-auto) untuk mendorong ke bawah jika ada sisa ruang, atau jarak fix jika sempit */}
+        <div className="mt-6 md:mt-6 text-center shrink-0">
           <p className="text-xs text-gray-400 font-medium">
             Belum punya akun?{" "}
             <span
