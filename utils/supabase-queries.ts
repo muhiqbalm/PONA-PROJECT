@@ -41,7 +41,7 @@ export const getReadingMaterials = async (
 
 export const getPracticeQuestions = async (
   supabase: SupabaseClient,
-  subjectId: number,
+  subjectId: string,
 ) => {
   const { data, error } = await supabase
     .from("practice_questions")

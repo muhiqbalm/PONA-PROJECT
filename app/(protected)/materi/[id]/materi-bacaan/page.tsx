@@ -3,8 +3,10 @@
 import { useState, useRef, useEffect } from "react";
 import HomeHeader from "@/components/homeHeader";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
-import { useParams } from "next/navigation";
+// 1. Tambahkan ArrowLeft di import
+import { ChevronLeft, ChevronRight, X, ZoomIn, ArrowLeft } from "lucide-react";
+// 2. Tambahkan useRouter
+import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase-client";
 import { getReadingMaterials } from "@/utils/supabase-queries";
 import type { CSSProperties } from "react";
@@ -34,6 +36,7 @@ interface MaterialSlide {
 
 export default function MateriPage() {
   const params = useParams();
+  const router = useRouter(); // 3. Inisialisasi Router
   const [materials, setMaterials] = useState<MaterialSlide[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -150,6 +153,12 @@ export default function MateriPage() {
         <div className="flex-1 flex flex-col items-center justify-center text-gray-500 px-6 text-center">
           <p className="mb-2 font-semibold">Materi Tidak Ditemukan</p>
           <p className="text-sm">Belum ada data materi untuk topik ini.</p>
+          <button
+            onClick={() => router.back()}
+            className="mt-4 px-6 py-2 bg-black text-white rounded-full text-sm font-bold"
+          >
+            Kembali
+          </button>
         </div>
       </div>
     );
@@ -165,11 +174,21 @@ export default function MateriPage() {
       </div>
 
       {/* MAIN CONTENT */}
+      {/* Tambahkan 'relative' agar tombol back bisa diposisikan absolute terhadap container ini */}
       <main
         ref={mainRef}
-        className="flex-1 w-full px-5 py-4 overflow-y-auto scroll-smooth"
+        className="flex-1 w-full px-5 py-4 overflow-y-auto scroll-smooth relative"
       >
-        <h1 className="text-center font-bold text-lg text-black mb-6">
+        {/* --- TOMBOL BACK --- */}
+        <button
+          onClick={() => router.back()}
+          className="absolute top-4 left-4 z-20 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm border border-gray-200 text-gray-600 hover:text-black hover:bg-white transition-all active:scale-95"
+          aria-label="Kembali"
+        >
+          <ArrowLeft size={20} strokeWidth={2.5} />
+        </button>
+
+        <h1 className="text-center font-bold text-lg text-black mb-6 px-10">
           {currentSlide.title}
         </h1>
 

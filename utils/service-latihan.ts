@@ -20,7 +20,7 @@ export const fetchExistingAnswers = async (
 export const fetchSubmissionStatus = async (
   supabase: SupabaseClient,
   userId: string,
-  subjectId: number,
+  subjectId: string,
 ) => {
   const { data, error } = await supabase
     .from("student_quiz_progress")
@@ -56,7 +56,7 @@ export const upsertAnswer = async (
 export const submitFinalQuiz = async (
   supabase: SupabaseClient,
   userId: string,
-  subjectId: number,
+  subjectId: string,
 ) => {
   const { error } = await supabase.from("student_quiz_progress").upsert(
     {

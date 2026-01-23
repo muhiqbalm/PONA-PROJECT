@@ -91,8 +91,8 @@ export default function ReviewPage() {
       const idParam = Array.isArray(params?.id) ? params?.id[0] : params?.id;
       if (!idParam || !user) return;
 
-      const parsedId = parseInt(idParam);
-      if (isNaN(parsedId)) {
+      const parsedId = idParam;
+      if (!parsedId) {
         setLoading(false);
         return;
       }

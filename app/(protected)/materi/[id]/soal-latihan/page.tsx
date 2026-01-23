@@ -110,7 +110,7 @@ export default function LatihanSoalPage() {
     setIsSubmitting(true);
     try {
       const idParam = Array.isArray(params?.id) ? params?.id[0] : params?.id;
-      await submitFinalQuiz(supabase, user!.id, parseInt(idParam!));
+      await submitFinalQuiz(supabase, user!.id, idParam!);
 
       toast.success("Jawaban berhasil dikumpulkan!", { duration: 4000 });
       setHasSubmitted(true);
