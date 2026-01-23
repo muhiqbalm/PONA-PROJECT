@@ -121,7 +121,7 @@ function ActionCard({
 }) {
   return (
     <Link href={href} className="w-full relative group">
-      <div className="bg-white rounded-3xl p-4 h-28 flex items-center outline-2 outline-transparent shadow-sm hover:shadow-lg hover:outline-green-100 shadow-slate-200 hover:shadow-green-200/50 transition-all cursor-pointer relative overflow-hidden">
+      <div className="bg-white rounded-3xl p-4 h-28 flex items-center outline-2 outline-transparent shadow-sm hover:shadow-lg hover:outline-slate-200 shadow-slate-200 hover:shadow-slate-200 transition-all cursor-pointer relative overflow-hidden">
         {/* --- BADGE SELESAI (HIJAU) --- */}
         {status === "completed" && (
           <div className="absolute top-3 right-3 bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold flex items-center gap-1 shadow-sm z-10 border border-green-200">
