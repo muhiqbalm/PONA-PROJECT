@@ -88,8 +88,8 @@ export default function GuruReviewStudentPage() {
     const initData = async () => {
       if (!subjectIdParam || !studentIdParam) return;
 
-      const parsedSubjectId = parseInt(subjectIdParam);
-      if (isNaN(parsedSubjectId)) return;
+      const parsedSubjectId = subjectIdParam;
+      if (!parsedSubjectId) return;
 
       try {
         setLoading(true);
