@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, CheckCircle, Loader2 } from "lucide-react"; // Import Loader2
+import { ArrowLeft, CheckCircle, Loader2, Lock } from "lucide-react";
 import { useParams } from "next/navigation";
 
 import { useAuth } from "@/components/authProvider";
 import { createClient } from "@/utils/supabase-client";
+import HomeHeader from "@/components/homeHeader";
 
-// Tipe status pengerjaan
 type QuizStatus = "idle" | "in_progress" | "completed";
 
 export default function DetailMateriPage() {
@@ -19,16 +19,28 @@ export default function DetailMateriPage() {
   const { user } = useAuth();
   const supabase = createClient();
 
-  // Ubah state boolean jadi string status
   const [quizStatus, setQuizStatus] = useState<QuizStatus>("idle");
+  // 1. Tambah state untuk menyimpan nama subject
+  const [subjectTitle, setSubjectTitle] = useState<string>("");
 
   useEffect(() => {
-    const checkProgress = async () => {
+    const fetchData = async () => {
       if (!user || !id) return;
-      const subjectId = parseInt(id);
+      const subjectId = id;
 
       try {
-        // 1. Cek apakah sudah SUBMIT FINAL (Selesai)
+        // --- A. AMBIL NAMA SUBJECT ---
+        const { data: subjectData } = await supabase
+          .from("subjects") // Pastikan nama tabelnya 'subjects'
+          .select("name") // Pastikan nama kolomnya 'title'
+          .eq("id", subjectId)
+          .single();
+
+        if (subjectData) {
+          setSubjectTitle(subjectData.name);
+        }
+
+        // --- B. CEK PROGRESS (Logic Lama) ---
         const { data: progressData } = await supabase
           .from("student_quiz_progress")
           .select("is_submitted")
@@ -38,11 +50,9 @@ export default function DetailMateriPage() {
 
         if (progressData?.is_submitted) {
           setQuizStatus("completed");
-          return; // Jika sudah selesai, stop disini
+          return;
         }
 
-        // 2. Jika belum selesai, Cek apakah DALAM PROSES (Ada jawaban tersimpan)
-        // Kita gunakan count, dengan join ke practice_questions untuk filter subject_id
         const { count } = await supabase
           .from("student_responses")
           .select("id, practice_questions!inner(subject_id)", {
@@ -58,28 +68,41 @@ export default function DetailMateriPage() {
           setQuizStatus("idle");
         }
       } catch (error) {
-        console.error("Error fetching progress:", error);
+        console.error("Error fetching data:", error);
       }
     };
 
-    checkProgress();
+    fetchData();
   }, [user, id]);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#FAFAFA] font-sans">
-      {/* HEADER */}
-      <header className="relative flex items-center justify-center px-6 py-6 bg-transparent">
+      <HomeHeader />
+
+      <header className="relative flex items-center justify-center px-6 pb-6 bg-transparent">
         <Link
           href="/"
-          className="absolute left-6 p-2 -ml-2 rounded-full hover:bg-gray-200 transition"
+          className="absolute left-6 top-0 p-2 -ml-2 rounded-full hover:bg-gray-200 transition"
         >
           <ArrowLeft className="w-6 h-6 text-black" strokeWidth={2.5} />
         </Link>
 
-        <h1 className="text-xl font-bold text-black">Materi Pembelajaran</h1>
+        {/* 2. Update Tampilan Header */}
+        <div className="flex flex-col items-center text-center pt-1">
+          <h1 className="text-xl font-bold text-black leading-none">
+            Materi Pembelajaran
+          </h1>
+          {/* Tampilkan Nama Subject di sini */}
+          <p className="text-sm text-gray-500 font-medium mt-1">
+            {subjectTitle ? (
+              subjectTitle
+            ) : (
+              <span className="animate-pulse">Memuat...</span>
+            )}
+          </p>
+        </div>
       </header>
 
-      {/* KONTEN UTAMA */}
       <main className="flex-1 w-full p-6 flex flex-col gap-4">
         <ActionCard
           title="Mari Belajar"
@@ -87,7 +110,6 @@ export default function DetailMateriPage() {
           href={`/materi/${id}/materi-bacaan`}
         />
 
-        {/* Kirim status ke komponen ActionCard */}
         <ActionCard
           title="Ayo Berlatih"
           imageSrc="/soal-latihan.png"
@@ -99,59 +121,95 @@ export default function DetailMateriPage() {
           title="Review Jawaban"
           imageSrc="/review-jawaban.png"
           href={`/materi/${id}/review-jawaban`}
-          // Opsional: Kunci jika belum pernah mengerjakan sama sekali
-          // isLocked={quizStatus === 'idle'}
+          isLocked={quizStatus !== "completed"}
         />
       </main>
     </div>
   );
 }
 
-// --- Komponen Kartu ---
+// --- Komponen ActionCard (Versi Final Tanpa Error TS) ---
 function ActionCard({
   title,
   imageSrc,
   href,
-  status = "idle", // Default idle
+  status = "idle",
+  isLocked = false,
 }: {
   title: string;
   imageSrc: string;
   href: string;
   status?: QuizStatus;
+  isLocked?: boolean;
 }) {
-  return (
-    <Link href={href} className="w-full relative group">
-      <div className="bg-white rounded-3xl p-4 h-28 flex items-center outline-2 outline-transparent shadow-sm hover:shadow-lg hover:outline-slate-200 shadow-slate-200 hover:shadow-slate-200 transition-all cursor-pointer relative overflow-hidden">
-        {/* --- BADGE SELESAI (HIJAU) --- */}
-        {status === "completed" && (
-          <div className="absolute top-3 right-3 bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold flex items-center gap-1 shadow-sm z-10 border border-green-200">
-            <CheckCircle size={16} /> Selesai
-          </div>
-        )}
-
-        {/* --- BADGE DALAM PROSES (BIRU) --- */}
-        {status === "in_progress" && (
-          <div className="absolute top-3 right-3 bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-bold flex items-center gap-1 shadow-sm z-10 border border-blue-100">
-            <Loader2 size={16} className="animate-spin" /> Dalam Proses
-          </div>
-        )}
-
-        {/* Area Gambar */}
-        <div className="w-24 h-20 relative flex-shrink-0 mr-4">
-          <Image src={imageSrc} alt={title} fill className="object-contain" />
+  const CardContent = (
+    <div
+      className={`
+        rounded-3xl p-4 h-28 flex items-center outline-2 outline-transparent shadow-sm transition-all relative overflow-hidden
+        ${
+          isLocked
+            ? "bg-gray-100 opacity-80"
+            : "bg-white hover:shadow-lg hover:outline-slate-200 shadow-slate-200 hover:shadow-slate-200"
+        }
+      `}
+    >
+      {/* --- BADGE STATUS --- */}
+      {status === "completed" && (
+        <div className="absolute top-3 right-3 bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold text-xs flex items-center gap-1 shadow-sm z-10 border border-green-200">
+          <CheckCircle size={14} /> Selesai
         </div>
+      )}
 
-        {/* Area Teks */}
-        <div className="flex-1">
-          <h2 className="text-lg font-bold text-black leading-tight">
-            {title.split(" ").map((word, i) => (
-              <span key={i} className="block">
-                {word}
-              </span>
-            ))}
-          </h2>
+      {status === "in_progress" && (
+        <div className="absolute top-3 right-3 bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-bold text-xs flex items-center gap-1 shadow-sm z-10 border border-blue-100">
+          <Loader2 size={14} className="animate-spin" /> Proses
         </div>
+      )}
+
+      {/* --- ICON GEMBOK (JIKA LOCKED) --- */}
+      {isLocked && (
+        <div className="absolute top-3 right-3 bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full font-bold text-xs flex items-center gap-1 shadow-sm z-10">
+          <Lock size={14} /> Terkunci
+        </div>
+      )}
+
+      {/* Area Gambar */}
+      <div
+        className={`w-24 h-20 relative flex-shrink-0 mr-4 ${
+          isLocked ? "grayscale opacity-50" : ""
+        }`}
+      >
+        <Image src={imageSrc} alt={title} fill className="object-contain" />
       </div>
+
+      {/* Area Teks */}
+      <div className="flex-1">
+        <h2
+          className={`text-lg font-bold leading-tight ${
+            isLocked ? "text-gray-400" : "text-black"
+          }`}
+        >
+          {title.split(" ").map((word, i) => (
+            <span key={i} className="block">
+              {word}
+            </span>
+          ))}
+        </h2>
+      </div>
+    </div>
+  );
+
+  if (isLocked) {
+    return (
+      <div className="w-full relative group cursor-not-allowed">
+        {CardContent}
+      </div>
+    );
+  }
+
+  return (
+    <Link href={href} className="w-full relative group cursor-pointer">
+      {CardContent}
     </Link>
   );
 }

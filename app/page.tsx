@@ -136,14 +136,15 @@ export default function Home() {
             UBAH: Tinggi dikurangi dari h-44 (176px) ke h-32 (128px) atau h-[20%] 
             agar sisa ruang untuk menu lebih banyak.
         */}
-        <div className="relative w-full h-32 flex-shrink-0 rounded-xl overflow-hidden shadow-sm bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 flex items-center mb-3 z-0">
-          <div className="w-1/2 pl-4 z-10">
-            <h2 className="font-bold text-base leading-tight text-black mb-1">
+        <div className="relative w-full h-40 flex-shrink-0 rounded-xl overflow-hidden shadow-sm bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 flex items-center mb-5 z-0">
+          <div className="flex-1 pl-6 z-10">
+            <h2 className="font-bold leading-tight text-black mb-2">
               FunBio <br />
               Digital Learning <br />
               Media
             </h2>
-            <p className="text-[10px] text-gray-600 font-medium">
+
+            <p className="text-sm text-gray-600 font-medium">
               Suitable for <br /> Senior High School
             </p>
           </div>
@@ -168,7 +169,7 @@ export default function Home() {
             UBAH: flex-1 agar grid mengambil SEMUA sisa ruang vertical. 
             Card di dalamnya akan menyesuaikan (h-full).
         */}
-        <div className="grid grid-cols-2 gap-3 flex-1 min-h-0">
+        <div className="grid grid-cols-2 gap-3 flex-1 pb-16 min-h-0">
           <MenuCard
             title="Materi Bacaan"
             imageSrc="https://aemfbowlzgerzztfryre.supabase.co/storage/v1/object/public/images/materi-bacaan.png"

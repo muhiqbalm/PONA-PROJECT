@@ -3,14 +3,14 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { User, Home, Info } from "lucide-react";
+import { User, Home, Info, LogIn } from "lucide-react"; // Import icon LogIn
 import { useAppUserData } from "@/utils/useAppUserData";
 
 export default function HomeHeader() {
   // Panggil hook untuk dapatkan datanya
   const { userData, loading } = useAppUserData();
 
-  // --- LOGIKA PENENTUAN LINK ---
+  // --- LOGIKA PENENTUAN LINK HOME ---
   // Default ke "/"
   let homeLink = "/";
 
@@ -40,20 +40,35 @@ export default function HomeHeader() {
 
       {/* --- BAGIAN KANAN: ICON NAVIGASI --- */}
       <nav className="flex items-center gap-5">
-        <Link href="/profile">
-          <button className="cursor-pointer flex items-center justify-center text-black hover:text-gray-600 transition-colors">
-            {/* Opsional: Tampilkan nama user jika ada, atau icon default */}
-            <User className="w-7 h-7 stroke-[2]" />
-          </button>
-        </Link>
+        {/* --- LOGIKA PROFILE vs LOGIN --- */}
+        {loading ? (
+          // 1. Tampilan saat Loading (Skeleton bulat)
+          <div className="w-7 h-7 bg-gray-200 rounded-full animate-pulse" />
+        ) : userData ? (
+          // 2. Jika SUDAH Login -> Tampilkan Icon Profile
+          <Link href="/profile">
+            <button className="cursor-pointer flex items-center justify-center text-black hover:text-gray-600 transition-colors">
+              <User className="w-7 h-7 stroke-[2]" />
+            </button>
+          </Link>
+        ) : (
+          // 3. Jika BELUM Login -> Tampilkan Tombol Login
+          <Link href="/auth/login">
+            <button className="cursor-pointer flex items-center gap-2 bg-black text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-gray-800 transition-all active:scale-95 shadow-sm">
+              <span>LOGIN</span>
+              <LogIn className="w-4 h-4" />
+            </button>
+          </Link>
+        )}
 
-        {/* Link Home menggunakan variabel homeLink yang sudah dihitung */}
+        {/* Link Home */}
         <Link href={homeLink}>
           <button className="cursor-pointer flex items-center justify-center text-black hover:text-gray-600 transition-colors">
             <Home className="w-7 h-7 stroke-[2]" />
           </button>
         </Link>
 
+        {/* Link About Us */}
         <Link href="/about-us">
           <button className="cursor-pointer flex items-center justify-center text-black hover:text-gray-600 transition-colors">
             <Info className="w-7 h-7 stroke-[2]" />
