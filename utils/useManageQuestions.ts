@@ -177,7 +177,7 @@ export const useManageQuestions = (subjectId: string | undefined) => {
     try {
       // A. Save Soal
       const questionPayload = {
-        subject_id: parseInt(subjectId),
+        subject_id: subjectId,
         question_text: formData.question_text,
         flip_image_front: formData.flip_image_front || null,
         flip_image_back: formData.flip_image_back || null,

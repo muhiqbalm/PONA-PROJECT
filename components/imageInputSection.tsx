@@ -43,13 +43,13 @@ const ImageInputSection = ({
       const filePath = `questions/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("materi_images")
+        .from("images")
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
       const { data: publicData } = supabase.storage
-        .from("materi_images")
+        .from("images")
         .getPublicUrl(filePath);
 
       onChange(publicData.publicUrl);

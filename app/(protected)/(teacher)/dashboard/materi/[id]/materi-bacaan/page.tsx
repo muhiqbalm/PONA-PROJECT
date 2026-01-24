@@ -68,14 +68,12 @@ const BlockMediaUploader = ({
       const fileName = `materi/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("materi_images")
+        .from("images")
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage
-        .from("materi_images")
-        .getPublicUrl(fileName);
+      const { data } = supabase.storage.from("images").getPublicUrl(fileName);
 
       onUpload(data.publicUrl);
       toast.success("Upload successful");
@@ -114,7 +112,7 @@ const BlockMediaUploader = ({
           </a>
           <button
             onClick={() => onUpload("")}
-            className="p-2 bg-red-500/80 text-white rounded-full backdrop-blur-sm hover:bg-red-600"
+            className="cursor-pointer p-2 bg-red-500/80 text-white rounded-full backdrop-blur-sm hover:bg-red-600"
           >
             <Trash2 size={16} />
           </button>
@@ -392,20 +390,20 @@ export default function GuruManageMateriPage() {
           <div className="flex gap-1">
             <button
               onClick={() => moveBlock(index, -1)}
-              className="p-2 hover:bg-gray-100 rounded text-gray-500 active:bg-gray-200"
+              className="cursor-pointer p-2 hover:bg-gray-100 rounded text-gray-500 active:bg-gray-200"
             >
               <MoveUp size={16} />
             </button>
             <button
               onClick={() => moveBlock(index, 1)}
-              className="p-2 hover:bg-gray-100 rounded text-gray-500 active:bg-gray-200"
+              className="cursor-pointer p-2 hover:bg-gray-100 rounded text-gray-500 active:bg-gray-200"
             >
               <MoveDown size={16} />
             </button>
             <div className="w-[1px] h-6 bg-gray-200 mx-1 self-center"></div>
             <button
               onClick={() => removeBlock(index)}
-              className="p-2 hover:bg-red-50 text-red-500 rounded active:bg-red-100"
+              className="cursor-pointer p-2 hover:bg-red-50 text-red-500 rounded active:bg-red-100"
             >
               <Trash2 size={16} />
             </button>
@@ -528,7 +526,7 @@ export default function GuruManageMateriPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={handleDeleteSlide}
-              className="p-2 rounded-full text-red-500 hover:bg-red-50"
+              className="cursor-pointer p-2 rounded-full text-red-500 hover:bg-red-50"
               title="Delete Slide"
             >
               <Trash2 size={20} />
@@ -537,16 +535,17 @@ export default function GuruManageMateriPage() {
             {/* ADD BUTTON */}
             <button
               onClick={() => setIsAddBlockModalOpen(true)}
-              className="p-2 rounded-full text-violet-600 bg-violet-50 hover:bg-violet-100 border border-violet-200 active:scale-95 transition"
+              className="cursor-pointer flex items-center gap-2 bg-white text-violet-600 px-4 py-2 rounded-full font-bold text-sm shadow-sm border border-violet-100 hover:bg-violet-50 transition active:scale-95"
               title="Add Content"
             >
-              <Plus size={20} /> Konten
+              <Plus size={16} strokeWidth={3} /> Konten
             </button>
 
             {/* Save Button */}
             <button
               onClick={handleSaveAll}
               disabled={isSaving}
+              style={{ cursor: isSaving ? "not-allowed" : "pointer" }}
               className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-5 py-2 rounded-full font-bold text-sm shadow-md transition disabled:opacity-70 active:scale-95"
             >
               {isSaving ? (
@@ -571,7 +570,7 @@ export default function GuruManageMateriPage() {
               className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all border whitespace-nowrap ${
                 currentSlideIndex === idx
                   ? "bg-violet-600 text-white border-violet-600 shadow-md transform scale-105"
-                  : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
+                  : "cursor-pointer bg-white text-gray-500 border-gray-200 hover:border-gray-300"
               }`}
             >
               Slide {idx + 1}
@@ -580,7 +579,7 @@ export default function GuruManageMateriPage() {
 
           <button
             onClick={handleAddSlide}
-            className="flex-shrink-0 w-8 h-8 rounded-full bg-violet-50 text-violet-600 border border-violet-200 flex items-center justify-center hover:bg-violet-100 active:scale-90 transition"
+            className="cursor-pointer flex-shrink-0 w-8 h-8 rounded-full bg-violet-50 text-violet-600 border border-violet-200 flex items-center justify-center hover:bg-violet-100 active:scale-90 transition"
           >
             <Plus size={16} />
           </button>
@@ -636,7 +635,7 @@ export default function GuruManageMateriPage() {
               <h3 className="text-lg font-bold text-gray-800">Add Content</h3>
               <button
                 onClick={() => setIsAddBlockModalOpen(false)}
-                className="p-2 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200"
+                className="cursor-pointer p-2 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200"
               >
                 <X size={20} />
               </button>
@@ -701,7 +700,7 @@ function BlockOption({
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center justify-center p-4 rounded-xl border ${color} hover:brightness-95 transition active:scale-95`}
+      className={`cursor-pointer flex flex-col items-center justify-center p-4 rounded-xl border ${color} hover:brightness-95 transition active:scale-95`}
     >
       <div className="mb-2">{icon}</div>
       <span className="text-xs font-bold">{label}</span>

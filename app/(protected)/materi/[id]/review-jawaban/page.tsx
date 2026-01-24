@@ -227,9 +227,9 @@ export default function ReviewPage() {
         <div className="absolute top-2 left-6 z-10">
           <Link
             href={`/materi/${idParam}`}
-            className="p-2 bg-white rounded-full shadow-sm border border-gray-100 flex items-center justify-center text-gray-600 hover:text-black hover:bg-gray-50 transition-all"
+            className="absolute top-0 p-2 rounded-full hover:bg-gray-200 transition"
           >
-            <ArrowLeft className="w-6 h-6" strokeWidth={2.5} />
+            <ArrowLeft className="w-6 h-6 text-black" strokeWidth={2.5} />
           </Link>
         </div>
 

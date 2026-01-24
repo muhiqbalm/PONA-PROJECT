@@ -10,6 +10,7 @@ import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase-client";
 import { getReadingMaterials } from "@/utils/supabase-queries";
 import type { CSSProperties } from "react";
+import Link from "next/link";
 
 // --- TIPE DATA ---
 export type ContentBlock =
@@ -36,6 +37,8 @@ interface MaterialSlide {
 
 export default function MateriPage() {
   const params = useParams();
+
+  const idParam = Array.isArray(params?.id) ? params?.id[0] : params?.id;
   const router = useRouter(); // 3. Inisialisasi Router
   const [materials, setMaterials] = useState<MaterialSlide[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -180,13 +183,12 @@ export default function MateriPage() {
         className="flex-1 w-full px-5 py-4 overflow-y-auto scroll-smooth relative"
       >
         {/* --- TOMBOL BACK --- */}
-        <button
-          onClick={() => router.back()}
-          className="absolute top-4 left-4 z-20 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm border border-gray-200 text-gray-600 hover:text-black hover:bg-white transition-all active:scale-95"
-          aria-label="Kembali"
+        <Link
+          href={`/materi/${idParam}`}
+          className="absolute top-2 p-2 rounded-full hover:bg-gray-200 transition"
         >
-          <ArrowLeft size={20} strokeWidth={2.5} />
-        </button>
+          <ArrowLeft className="w-6 h-6 text-black" strokeWidth={2.5} />
+        </Link>
 
         <h1 className="text-center font-bold text-lg text-black mb-6 px-10">
           {currentSlide.title}
