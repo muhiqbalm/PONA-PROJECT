@@ -36,7 +36,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(parsedUser);
       } catch (error) {
         console.error("Gagal parsing data user", error);
-        Cookies.remove("app_user_data");
+        // Hapus cookie jika corrupt, dengan path root agar bersih
+        Cookies.remove("app_user_data", { path: "/" });
       }
     }
 
@@ -45,10 +46,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Fungsi Logout Global
   const logout = () => {
-    Cookies.remove("app_user_data");
+    // PERBAIKAN DI SINI:
+    // Tambahkan { path: '/' } agar cookie bisa dihapus dari sub-folder manapun.
+    // Jika cookie dibuat dengan domain spesifik, tambahkan juga { domain: '...' }
+    Cookies.remove("app_user_data", { path: "/" });
+
+    // Reset state user
     setUser(null);
-    router.push("/auth/login");
-    router.refresh(); // Refresh agar middleware/server component tahu session habis
+
+    // Redirect ke halaman login
+    router.replace("/auth/login"); // Menggunakan replace agar user tidak bisa back ke halaman sebelumnya
+    router.refresh(); // Refresh agar Server Components mereset cache data user
   };
 
   return (

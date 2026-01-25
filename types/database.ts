@@ -12,6 +12,7 @@ export interface Subject {
   id: string;
   name: string;
   created_at: string;
+  is_active: boolean;
 }
 
 // 2. Reading Material

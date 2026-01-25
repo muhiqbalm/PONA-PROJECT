@@ -2,7 +2,7 @@
 
 import {
   AlertTriangle,
-  ArrowLeft, // Import Icon ArrowLeft
+  ArrowLeft,
   CheckCircle,
   ChevronLeft,
   ChevronRight,
@@ -10,7 +10,7 @@ import {
   X,
 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link"; // Import Link
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
@@ -20,7 +20,7 @@ import HomeHeader from "@/components/homeHeader";
 import { submitFinalQuiz } from "@/utils/service-latihan";
 import { useLatihanSoal } from "@/utils/useLatihanSoal";
 
-// --- KOMPONEN SKELETON ---
+// --- KOMPONEN SKELETON (Tetap sama) ---
 const SkeletonLoader = () => {
   return (
     <div className="flex flex-col min-h-screen bg-[#FAFAFA] font-sans">
@@ -59,10 +59,8 @@ export default function LatihanSoalPage() {
   const router = useRouter();
   const { user } = useAuth();
 
-  // Ekstrak ID untuk link kembali
   const idParam = Array.isArray(params?.id) ? params?.id[0] : params?.id;
 
-  // --- GUNAKAN CUSTOM HOOK ---
   const {
     questions,
     loading,
@@ -73,14 +71,12 @@ export default function LatihanSoalPage() {
     supabase,
   } = useLatihanSoal(params?.id, user);
 
-  // State UI Lokal
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // --- LOGIC SIMPAN ---
   const saveAnswerToDb = async (questionId: string, answerText: string) => {
     if (!user || hasSubmitted) return;
     if (!answerText || answerText.trim() === "") return;
@@ -104,7 +100,6 @@ export default function LatihanSoalPage() {
     }
   };
 
-  // --- LOGIC FINAL SUBMIT ---
   const onConfirmSubmit = async () => {
     setShowSubmitModal(false);
     setIsSubmitting(true);
@@ -114,7 +109,7 @@ export default function LatihanSoalPage() {
 
       toast.success("Jawaban berhasil dikumpulkan!", { duration: 4000 });
       setHasSubmitted(true);
-      router.push(`/materi/${idParam}`); // Redirect kembali ke materi
+      router.push(`/materi/${idParam}`);
     } catch (err) {
       console.error(err);
       toast.error("Gagal mengumpulkan jawaban.");
@@ -123,7 +118,6 @@ export default function LatihanSoalPage() {
     }
   };
 
-  // --- HANDLERS ---
   const handleAnswerChange = (text: string) => {
     setAnswers((prev) => ({
       ...prev,
@@ -131,19 +125,44 @@ export default function LatihanSoalPage() {
     }));
   };
 
+  // --- PERBAIKAN DI SINI: Validasi Jawaban Kosong ---
   const handleNext = async () => {
     const currentQ = questions[currentIndex];
     const currentAns = answers[currentQ.id] || "";
+
+    // Simpan jawaban saat ini dulu
     await saveAnswerToDb(currentQ.id, currentAns);
 
     if (currentIndex < questions.length - 1) {
+      // Jika belum slide terakhir, lanjut next biasa
       setCurrentIndex((prev) => prev + 1);
       setShowModal(false);
       setIsFlipped(false);
     } else {
+      // Jika Slide Terakhir (Tombol Submit ditekan)
       if (hasSubmitted) {
         router.push(`/materi/${idParam}`);
       } else {
+        // VALIDASI: Cek apakah ada soal yang jawabannya kosong/spasi saja
+        const hasEmptyAnswers = questions.some((q) => {
+          const ans = answers[q.id];
+          return !ans || ans.trim() === "";
+        });
+
+        if (hasEmptyAnswers) {
+          // Tampilkan Error Toast
+          toast.error("Harap isi semua jawaban sebelum mengumpulkan!", {
+            icon: "⚠️",
+            style: {
+              borderRadius: "10px",
+              background: "#333",
+              color: "#fff",
+            },
+          });
+          return; // STOP, jangan buka modal submit
+        }
+
+        // Jika lolos validasi, buka modal konfirmasi
         setShowSubmitModal(true);
       }
     }
@@ -166,7 +185,6 @@ export default function LatihanSoalPage() {
     setTimeout(() => setIsFlipped(false), 300);
   };
 
-  // --- RENDER ---
   if (loading) return <SkeletonLoader />;
 
   if (questions.length === 0) {
@@ -187,8 +205,6 @@ export default function LatihanSoalPage() {
       <HomeHeader />
 
       <main className="flex-1 w-full px-6 pb-8 flex flex-col relative">
-        {/* --- TOMBOL KEMBALI (BARU) --- */}
-        {/* Diposisikan absolute agar judul tetap di tengah */}
         <div className="absolute top-0 z-10">
           <Link
             href={`/materi/${idParam}`}
@@ -198,7 +214,6 @@ export default function LatihanSoalPage() {
           </Link>
         </div>
 
-        {/* JUDUL */}
         <div className="w-full flex justify-center mb-4 mt-2">
           <div className="relative w-56 h-32">
             <Image
@@ -211,19 +226,17 @@ export default function LatihanSoalPage() {
           </div>
         </div>
 
-        {/* AREA SOAL */}
         <div className="flex gap-4 mb-8 min-h-[120px]">
           <div className="flex-shrink-0">
             <div className="w-12 h-12 bg-violet-200 rounded-lg flex items-center justify-center text-3xl font-bold text-gray-700">
               {currentQuestion.number}
             </div>
           </div>
-          <p className="text-sm text-gray-800 leading-relaxed text-justify animate-fadeIn">
+          <p className="text-sm text-gray-800 leading-relaxed animate-fadeIn">
             {currentQuestion.question_text}
           </p>
         </div>
 
-        {/* AREA JAWABAN */}
         <div className="flex-1 relative flex flex-col min-h-[300px]">
           <textarea
             value={answers[currentQuestion.id] || ""}
@@ -262,7 +275,6 @@ export default function LatihanSoalPage() {
             </div>
           </div>
 
-          {/* NAVIGASI */}
           <div className="w-full flex justify-between items-center py-4 z-40 relative">
             <div className="w-12">
               {currentIndex > 0 && (
@@ -322,16 +334,20 @@ export default function LatihanSoalPage() {
         </div>
       </main>
 
-      {/* --- MODAL 1: FLIP CARD (BANTUAN) --- */}
+      {/* --- MODAL FLIP CARD --- */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
           <div className="relative w-full max-w-sm aspect-[3/4] [perspective:1000px]">
             <div
-              className={`relative w-full h-full transition-all duration-700 [transform-style:preserve-3d] ${isFlipped ? "[transform:rotateY(180deg)]" : ""}`}
+              className={`relative w-full h-full transition-all duration-700 [transform-style:preserve-3d] ${
+                isFlipped ? "[transform:rotateY(180deg)]" : ""
+              }`}
             >
               {/* Depan */}
               <div
-                className={`absolute inset-0 w-full h-full [backface-visibility:hidden] bg-transparent ${isFlipped ? "pointer-events-none" : "z-10"}`}
+                className={`absolute inset-0 w-full h-full [backface-visibility:hidden] bg-transparent ${
+                  isFlipped ? "pointer-events-none" : "z-10"
+                }`}
               >
                 <div className="relative w-full h-full rounded-xl overflow-hidden shadow-2xl bg-white flex items-center justify-center">
                   {currentQuestion.flip_image_front ? (
@@ -342,7 +358,9 @@ export default function LatihanSoalPage() {
                       className="object-fill"
                     />
                   ) : (
-                    <span className="text-gray-400">No Image</span>
+                    <span className="text-gray-400">
+                      Flash card tidak tersedia
+                    </span>
                   )}
                   <button
                     onClick={handleCloseModal}
@@ -362,7 +380,9 @@ export default function LatihanSoalPage() {
               </div>
               {/* Belakang */}
               <div
-                className={`absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-transparent ${isFlipped ? "z-10" : "pointer-events-none"}`}
+                className={`absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-transparent ${
+                  isFlipped ? "z-10" : "pointer-events-none"
+                }`}
               >
                 <div className="relative w-full h-full rounded-xl overflow-hidden shadow-2xl bg-white flex items-center justify-center">
                   {currentQuestion.flip_image_back ? (
@@ -373,7 +393,9 @@ export default function LatihanSoalPage() {
                       className="object-fill"
                     />
                   ) : (
-                    <span className="text-gray-400">No Image</span>
+                    <span className="text-gray-400">
+                      Flash card tidak tersedia
+                    </span>
                   )}
                   <button
                     onClick={handleCloseModal}
@@ -396,7 +418,7 @@ export default function LatihanSoalPage() {
         </div>
       )}
 
-      {/* --- MODAL 2: KONFIRMASI SUBMIT --- */}
+      {/* --- MODAL CONFIRM SUBMIT --- */}
       {showSubmitModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           <div

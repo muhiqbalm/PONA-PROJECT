@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useState } from "react"; // Import useState
 import {
   ArrowLeft,
   Plus,
@@ -15,6 +16,7 @@ import {
   Image as ImageIcon,
   StickyNote,
   ChevronDown,
+  AlertTriangle, // Icon untuk modal delete
 } from "lucide-react";
 
 import HomeHeader from "@/components/homeHeader";
@@ -25,7 +27,6 @@ export default function GuruManageQuestionsPage() {
   const params = useParams();
   const subjectId = Array.isArray(params?.id) ? params?.id[0] : params?.id;
 
-  // PANGGIL HOOK DI SINI
   const {
     questions,
     loading,
@@ -44,6 +45,32 @@ export default function GuruManageQuestionsPage() {
     removeRubricRow,
     updateRubric,
   } = useManageQuestions(subjectId);
+
+  // --- STATE UNTUK MODAL DELETE ---
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [questionToDelete, setQuestionToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // --- HANDLER DELETE ---
+  const handleClickDelete = (id: string) => {
+    setQuestionToDelete(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!questionToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteQuestion(questionToDelete);
+      setIsDeleteModalOpen(false);
+      setQuestionToDelete(null);
+    } catch (error) {
+      console.error("Gagal menghapus soal", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen bg-[#FAFAFA] font-sans overflow-hidden">
@@ -136,8 +163,9 @@ export default function GuruManageQuestionsPage() {
                   >
                     <Pencil size={16} />
                   </button>
+                  {/* UPDATE: Panggil handleClickDelete */}
                   <button
-                    onClick={() => deleteQuestion(q.id)}
+                    onClick={() => handleClickDelete(q.id)}
                     className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                   >
                     <Trash2 size={16} />
@@ -149,9 +177,9 @@ export default function GuruManageQuestionsPage() {
         )}
       </main>
 
-      {/* --- MODAL FORM --- */}
+      {/* --- MODAL FORM (ADD/EDIT) --- */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm sm:p-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm sm:p-4 animate-in fade-in duration-200">
           <div className="bg-white w-full h-[95vh] sm:h-auto sm:max-h-[85vh] sm:max-w-2xl rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300">
             {/* Header Modal */}
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white flex-shrink-0">
@@ -381,6 +409,54 @@ export default function GuruManageQuestionsPage() {
                 )}
                 Simpan
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL DELETE KONFIRMASI (BARU) --- */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl relative animate-scaleIn">
+            <button
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition p-2 bg-gray-100 rounded-full"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
+                <AlertTriangle className="text-red-500" size={32} />
+              </div>
+
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Hapus Soal Ini?
+              </h3>
+              <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                Tindakan ini tidak dapat dibatalkan. Data soal, kunci jawaban,
+                dan rubrik terkait akan dihapus secara permanen.
+              </p>
+
+              <div className="flex gap-3 w-full">
+                <button
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  className="flex-1 py-3 rounded-xl font-bold text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 transition"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleConfirmDelete}
+                  disabled={isDeleting}
+                  className="flex-1 py-3 rounded-xl font-bold text-sm text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-200 transition flex items-center justify-center gap-2 disabled:opacity-70"
+                >
+                  {isDeleting ? (
+                    <Loader2 size={18} className="animate-spin" />
+                  ) : (
+                    "Ya, Hapus"
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>

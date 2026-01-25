@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import {
   ArrowLeft,
   BookOpen,
@@ -12,22 +13,25 @@ import {
   Save,
   Search,
   X,
+  Power,
+  AlertTriangle,
 } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 import { useAuth } from "@/components/authProvider";
 import HomeHeader from "@/components/homeHeader";
 import { useSubjectManager } from "@/utils/useSubjectManager";
+import { createClient } from "@/utils/supabase-client";
 
 export default function KelolaMateriPage() {
   const { isLoading: authLoading } = useAuth();
+  const supabase = createClient();
 
   const {
     filteredSubjects,
     loading,
     searchQuery,
     setSearchQuery,
-
-    // Edit logic
     isEditModalOpen,
     setIsEditModalOpen,
     newName,
@@ -35,8 +39,6 @@ export default function KelolaMateriPage() {
     isSaving,
     openEditModal,
     saveEditSubject,
-
-    // Add logic
     isAddModalOpen,
     setIsAddModalOpen,
     newSubjectName,
@@ -46,7 +48,47 @@ export default function KelolaMateriPage() {
     closeAddModal,
   } = useSubjectManager();
 
-  // --- RENDER LOADING ---
+  // --- STATE TOGGLE STATUS ---
+  const [isToggleModalOpen, setIsToggleModalOpen] = useState(false);
+  const [subjectToToggle, setSubjectToToggle] = useState<any | null>(null);
+  const [isToggling, setIsToggling] = useState(false);
+
+  // --- HANDLER TOGGLE ---
+  const handleToggleClick = (subject: any) => {
+    setSubjectToToggle(subject);
+    setIsToggleModalOpen(true);
+  };
+
+  const confirmToggleStatus = async () => {
+    if (!subjectToToggle) return;
+
+    setIsToggling(true);
+    try {
+      const newStatus = !subjectToToggle.is_active;
+
+      const { error } = await supabase
+        .from("subjects")
+        .update({ is_active: newStatus })
+        .eq("id", subjectToToggle.id);
+
+      if (error) throw error;
+
+      toast.success(
+        `Materi berhasil ${newStatus ? "diaktifkan" : "dinonaktifkan"}`,
+      );
+
+      subjectToToggle.is_active = newStatus;
+
+      setIsToggleModalOpen(false);
+      setSubjectToToggle(null);
+    } catch (error: any) {
+      console.error(error);
+      toast.error("Gagal mengubah status materi.");
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="flex flex-col min-h-screen bg-[#FAFAFA]">
@@ -99,7 +141,7 @@ export default function KelolaMateriPage() {
         {/* --- STICKY SECTION (Search & Tambah Sejajar) --- */}
         <div className="sticky top-0 z-30 bg-[#FAFAFA]/95 backdrop-blur-sm pt-2 pb-4 transition-all">
           <div className="flex items-center gap-3">
-            {/* SEARCH BAR (flex-1 agar memenuhi ruang sisa) */}
+            {/* SEARCH BAR */}
             <div className="relative flex-1">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                 <Search size={16} />
@@ -113,7 +155,7 @@ export default function KelolaMateriPage() {
               />
             </div>
 
-            {/* TOMBOL TAMBAH (KOTAK) */}
+            {/* TOMBOL TAMBAH */}
             <button
               onClick={() => setIsAddModalOpen(true)}
               className="cursor-pointer flex-shrink-0 w-10 h-10 bg-green-600 text-white rounded-lg flex items-center justify-center shadow-md shadow-green-200 hover:bg-green-700 active:scale-90 transition-transform"
@@ -123,7 +165,6 @@ export default function KelolaMateriPage() {
             </button>
           </div>
 
-          {/* Shadow gradient kecil di bawah sticky area */}
           <div className="absolute bottom-[-10px] left-0 w-full h-4 bg-gradient-to-b from-[#FAFAFA] to-transparent pointer-events-none"></div>
         </div>
 
@@ -144,11 +185,24 @@ export default function KelolaMateriPage() {
             filteredSubjects.map((subject, index) => (
               <div
                 key={subject.id}
-                className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col gap-4 relative overflow-hidden transition hover:shadow-md"
+                // PERUBAHAN 1: Menghapus "opacity-75 grayscale" agar card tetap terlihat aktif/bisa diedit
+                // Saya ganti menjadi border-l-4 gray-300 untuk penanda visual halus jika non-aktif, opsional.
+                className={`bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col gap-4 relative overflow-hidden transition hover:shadow-md 
+                  ${!subject.is_active ? "bg-gray-50/30" : ""}
+                `}
               >
-                <div className="flex justify-between items-start z-10">
+                {/* Badge Status */}
+                {!subject.is_active && (
+                  <div className="absolute top-0 left-0 bg-gray-200 text-gray-500 text-[9px] font-bold px-3 py-1 rounded-br-xl z-20 shadow-sm tracking-wide">
+                    NON-AKTIF
+                  </div>
+                )}
+
+                <div
+                  className={`flex justify-between items-start z-10 ${!subject.is_active ? "mt-5" : ""}`}
+                >
                   <div className="flex gap-3 items-center">
-                    <div className="w-8 h-8 bg-green-50 rounded-full flex items-center justify-center text-green-700 font-black text-md shadow-inner">
+                    <div className="w-8 h-8 bg-green-50 rounded-full flex items-center justify-center text-green-700 font-black text-md shadow-inner shrink-0">
                       {index + 1}
                     </div>
 
@@ -158,16 +212,43 @@ export default function KelolaMateriPage() {
                       </h3>
                     </div>
                   </div>
-                  <button
-                    onClick={() => openEditModal(subject)}
-                    className="cursor-pointer p-2 bg-gray-50 text-gray-400 rounded-full hover:bg-amber-50 hover:text-amber-500 transition"
-                  >
-                    <Edit3 size={16} />
-                  </button>
+
+                  {/* ACTION BUTTONS */}
+                  <div className="flex items-center gap-3">
+                    {/* TOGGLE SWITCH BUTTON */}
+                    <button
+                      onClick={() => handleToggleClick(subject)}
+                      className={`
+                        relative w-12 h-7 rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 border border-transparent
+                        ${subject.is_active ? "bg-green-600" : "bg-gray-300"}
+                      `}
+                      title={
+                        subject.is_active
+                          ? "Nonaktifkan Materi"
+                          : "Aktifkan Materi"
+                      }
+                    >
+                      <span
+                        className={`
+                          absolute left-1 top-1 w-5 h-5 rounded-full shadow-sm transform transition-transform duration-200 ease-in-out border border-gray-200 bg-gray-100 
+                          ${subject.is_active ? "translate-x-5" : "translate-x-0"}
+                        `}
+                      />
+                    </button>
+
+                    <button
+                      onClick={() => openEditModal(subject)}
+                      className="cursor-pointer p-2 bg-gray-50 text-gray-400 rounded-full hover:bg-amber-50 hover:text-amber-500 transition"
+                    >
+                      <Edit3 size={18} />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="h-px w-full bg-gray-50"></div>
 
+                {/* Menu Navigasi */}
+                {/* PERUBAHAN 2: Menghapus "pointer-events-none opacity-50" agar tombol tetap bisa diklik */}
                 <div className="grid grid-cols-3 gap-2">
                   <Link
                     href={`/dashboard/materi/${subject.id}/materi-bacaan`}
@@ -197,7 +278,83 @@ export default function KelolaMateriPage() {
         </div>
       </main>
 
-      {/* Pastikan Modal Edit dan Modal Tambah tetap ada di sini seperti kode sebelumnya */}
+      {/* --- MODAL KONFIRMASI TOGGLE --- */}
+      {isToggleModalOpen && subjectToToggle && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-[2rem] p-6 w-full max-w-sm shadow-2xl relative animate-scaleIn">
+            <button
+              onClick={() => setIsToggleModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition p-2 bg-gray-100 rounded-full"
+            >
+              <X size={20} />
+            </button>
+            <div className="mb-4">
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
+                  subjectToToggle.is_active
+                    ? "bg-red-100 text-red-600"
+                    : "bg-blue-100 text-blue-600"
+                }`}
+              >
+                {subjectToToggle.is_active ? (
+                  <Power size={24} strokeWidth={3} />
+                ) : (
+                  <ClipboardCheck size={24} strokeWidth={3} />
+                )}
+              </div>
+              <h3 className="text-xl font-black text-gray-900">
+                {subjectToToggle.is_active
+                  ? "Nonaktifkan Materi?"
+                  : "Aktifkan Materi?"}
+              </h3>
+              <p className="text-sm text-gray-500 mt-2 leading-relaxed">
+                {subjectToToggle.is_active ? (
+                  <>
+                    Siswa tidak akan bisa melihat atau mengakses materi{" "}
+                    <span className="font-bold text-gray-800">
+                      "{subjectToToggle.name}"
+                    </span>{" "}
+                    hingga Anda mengaktifkannya kembali.
+                  </>
+                ) : (
+                  <>
+                    Materi{" "}
+                    <span className="font-bold text-gray-800">
+                      "{subjectToToggle.name}"
+                    </span>{" "}
+                    akan muncul kembali di halaman siswa dan dapat diakses.
+                  </>
+                )}
+              </p>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setIsToggleModalOpen(false)}
+                className="flex-1 py-3 rounded-full font-bold text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 transition"
+              >
+                Batal
+              </button>
+              <button
+                onClick={confirmToggleStatus}
+                disabled={isToggling}
+                className={`flex-1 py-3 rounded-full font-bold text-sm text-white shadow-lg flex items-center justify-center gap-2 transition disabled:opacity-70 active:scale-95 ${
+                  subjectToToggle.is_active
+                    ? "bg-red-600 hover:bg-red-700 shadow-red-200"
+                    : "bg-blue-600 hover:bg-blue-700 shadow-blue-200"
+                }`}
+              >
+                {isToggling ? (
+                  <Loader2 className="animate-spin" size={18} />
+                ) : (
+                  "Ya, Konfirmasi"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Edit dan Tambah tetap sama... */}
       {isEditModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm animate-fadeIn">
           <div className="bg-white rounded-[2rem] p-6 w-full max-w-sm shadow-2xl relative">

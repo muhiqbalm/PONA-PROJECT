@@ -123,7 +123,7 @@ export default function MateriPage() {
     return (
       <li
         key={index}
-        className={`text-sm text-gray-700 leading-relaxed text-justify list-none ${containerClass}`}
+        className={`text-sm text-gray-700 leading-relaxed  list-none ${containerClass}`}
       >
         {marker}
         {cleanText.split(/(\*\*.*?\*\*)/g).map((part, p) =>
@@ -216,7 +216,7 @@ export default function MateriPage() {
                 <p
                   key={index}
                   style={block.style}
-                  className="text-sm text-gray-700 leading-relaxed text-justify whitespace-pre-line"
+                  className="text-sm text-gray-700 leading-relaxed whitespace-pre-line"
                 >
                   {parts.map((part, i) =>
                     part.startsWith("**") && part.endsWith("**") ? (
@@ -353,7 +353,7 @@ export default function MateriPage() {
                       </h3>
                     )}
                     {hasText && (
-                      <div className="text-sm text-gray-700 leading-relaxed text-justify">
+                      <div className="text-sm text-gray-700 leading-relaxed ">
                         {block.text}
                       </div>
                     )}
@@ -388,7 +388,7 @@ export default function MateriPage() {
                     return (
                       <li
                         key={i}
-                        className="text-sm text-gray-700 pl-1 leading-relaxed text-justify"
+                        className="text-sm text-gray-700 pl-1 leading-relaxed "
                       >
                         {parts.map((part, p) =>
                           part.startsWith("**") && part.endsWith("**") ? (

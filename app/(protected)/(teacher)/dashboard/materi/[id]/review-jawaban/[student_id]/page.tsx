@@ -272,7 +272,7 @@ export default function GuruReviewStudentPage() {
               {currentQuestion.number}
             </div>
           </div>
-          <p className="text-sm text-gray-800 leading-relaxed text-justify">
+          <p className="text-sm text-gray-800 leading-relaxed ">
             {currentQuestion.question_text}
           </p>
         </div>

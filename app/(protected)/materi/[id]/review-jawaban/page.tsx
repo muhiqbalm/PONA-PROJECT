@@ -246,7 +246,7 @@ export default function ReviewPage() {
               {currentQuestion.number}
             </div>
           </div>
-          <p className="text-sm text-gray-800 leading-relaxed text-justify">
+          <p className="text-sm text-gray-800 leading-relaxed ">
             {currentQuestion.question_text}
           </p>
         </div>
@@ -412,7 +412,9 @@ export default function ReviewPage() {
                       className="object-fill"
                     />
                   ) : (
-                    <span className="text-gray-400">No Image</span>
+                    <span className="text-gray-400">
+                      Flash card tidak tersedia
+                    </span>
                   )}
                   <button
                     onClick={handleCloseModal}
@@ -444,7 +446,9 @@ export default function ReviewPage() {
                       className="object-fill"
                     />
                   ) : (
-                    <span className="text-gray-400">No Image</span>
+                    <span className="text-gray-400">
+                      Flash card tidak tersedia
+                    </span>
                   )}
                   <button
                     onClick={handleCloseModal}

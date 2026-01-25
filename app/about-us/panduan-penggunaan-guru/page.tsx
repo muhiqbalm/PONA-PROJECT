@@ -145,6 +145,7 @@ export default function PanduanGuruPage() {
           >
             <ArrowLeft className="w-6 h-6 text-black" strokeWidth={2.5} />
           </Link>
+
           <div className="text-center">
             <h1 className="text-xl font-bold text-black leading-none">
               Panduan Guru
