@@ -28,7 +28,7 @@ export default function PanduanPenggunaanPage() {
       title: "Pengerjaan Soal",
       description:
         "Kerjakan 'Soal Latihan'. Jika buntu, gunakan fitur bantuan Flash Card.",
-      icon: BrainCircuit, // Icon futuristik untuk otak/belajar
+      icon: BrainCircuit,
       gradient: "from-purple-500 to-pink-500",
       bgIcon: "bg-purple-50",
       textIcon: "text-purple-600",
@@ -74,7 +74,9 @@ export default function PanduanPenggunaanPage() {
           {guides.map((item, index) => (
             <div
               key={index}
-              className="relative bg-white rounded-3xl p-5 shadow-sm border border-gray-100 overflow-hidden group"
+              // PERUBAHAN DISINI:
+              // Menambahkan 'transform-gpu' dan 'isolate' untuk memperbaiki bug clipping pada border-radius
+              className="relative bg-white rounded-3xl p-5 shadow-sm border border-gray-100 overflow-hidden group transform-gpu isolate"
             >
               {/* Dekorasi Garis Gradasi di Kiri */}
               <div
@@ -83,7 +85,8 @@ export default function PanduanPenggunaanPage() {
 
               {/* Dekorasi Background Blob Halus */}
               <div
-                className={`absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-10 blur-xl bg-gradient-to-br ${item.gradient}`}
+                // Tips tambahan: pointer-events-none agar glow tidak mengganggu klik mouse/touch
+                className={`absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-10 blur-xl bg-gradient-to-br ${item.gradient} pointer-events-none`}
               />
 
               <div className="flex gap-4 items-start relative z-10">
@@ -106,7 +109,6 @@ export default function PanduanPenggunaanPage() {
                 <div className="flex-1 pt-1">
                   <h3 className="text-base font-bold text-black mb-1 flex items-center gap-2">
                     {item.title}
-                    {/* Hiasan kecil futuristik (Zap icon) hanya di item tertentu jika mau, atau di semua */}
                     {index === 1 && (
                       <Zap
                         size={12}

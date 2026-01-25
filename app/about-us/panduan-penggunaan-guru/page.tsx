@@ -137,7 +137,7 @@ export default function PanduanGuruPage() {
       </div>
 
       <main className="flex-1 w-full overflow-y-auto relative">
-        {/* PERUBAHAN DISINI: Header Sticky Solid & Full Width */}
+        {/* Header Sticky Solid & Full Width */}
         <header className="sticky top-0 z-30 w-full flex items-center justify-center px-6 py-4 bg-[#FAFAFA] border-b border-gray-100 shrink-0 mb-6">
           <Link
             href="/about-us"
@@ -157,7 +157,7 @@ export default function PanduanGuruPage() {
 
         <div className="flex flex-col gap-4 px-5 pb-8">
           {/* Intro Card */}
-          <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-3xl p-5 shadow-lg text-white mb-2 relative overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-3xl p-5 shadow-lg text-white mb-2 relative overflow-hidden transform-gpu isolate">
             <div className="relative z-10 flex items-start gap-3">
               <ShieldAlert className="w-6 h-6 text-yellow-400 shrink-0 mt-1" />
               <div>
@@ -170,20 +170,23 @@ export default function PanduanGuruPage() {
               </div>
             </div>
             {/* Background Decoration */}
-            <div className="absolute right-0 top-0 w-32 h-32 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
+            <div className="absolute right-0 top-0 w-32 h-32 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none"></div>
           </div>
 
           {/* List Panduan */}
           {teacherGuides.map((item, index) => (
             <div
               key={index}
-              className="relative bg-white rounded-3xl p-5 shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-shadow"
+              // FIX: Menambahkan 'transform-gpu' dan 'isolate'
+              // Ini memaksa browser merender layer secara terpisah sehingga overflow-hidden bekerja sempurna pada efek blur
+              className="relative bg-white rounded-3xl p-5 shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-shadow transform-gpu isolate"
             >
               <div
                 className={`absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b ${item.gradient}`}
               />
               <div
-                className={`absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-10 blur-xl bg-gradient-to-br ${item.gradient}`}
+                // Tambahan pointer-events-none agar glow tidak menghalangi klik
+                className={`absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-10 blur-xl bg-gradient-to-br ${item.gradient} pointer-events-none`}
               />
 
               <div className="flex gap-4 items-start relative z-10">
