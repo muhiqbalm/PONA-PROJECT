@@ -62,19 +62,33 @@ export default function ProfilePage() {
 
   const handleSaveEdit = async () => {
     if (!tempIdentity.trim()) {
-      toast.error("Kelas tidak boleh kosong!");
+      toast.error(
+        isTeacher ? "NPP tidak boleh kosong!" : "Kelas tidak boleh kosong!",
+      );
       return;
     }
     setIsSaving(true);
 
     try {
-      // 1. Update Supabase
-      const { error } = await supabase.auth.updateUser({
+      // 1. Update Supabase Auth Metadata (Agar data di session tetap sync)
+      const { error: authError } = await supabase.auth.updateUser({
         data: { identity_value: tempIdentity },
       });
-      if (error) throw error;
+      if (authError) throw authError;
 
-      // 2. Update Cookie
+      // 2. Update Database Table (students atau teachers)
+      // Menentukan tabel dan kolom target
+      const tableName = isTeacher ? "teachers" : "students";
+      const columnName = isTeacher ? "npp" : "class_name"; // Sesuaikan nama kolom di DB-mu
+
+      const { error: dbError } = await supabase
+        .from(tableName)
+        .update({ [columnName]: tempIdentity })
+        .eq("id", currentUser?.id); // Asumsi ID di tabel sama dengan ID di Auth
+
+      if (dbError) throw dbError;
+
+      // 3. Update Cookie (Agar data persist saat refresh)
       const currentCookie = Cookies.get("app_user_data");
       if (currentCookie) {
         const parsedCookie = JSON.parse(currentCookie);
@@ -84,7 +98,7 @@ export default function ProfilePage() {
         });
       }
 
-      // 3. Update State Lokal (UI Update Instan)
+      // 4. Update State Lokal (UI Update Instan)
       if (currentUser) {
         setDisplayUser({
           ...currentUser,
@@ -94,8 +108,6 @@ export default function ProfilePage() {
 
       toast.success("Data berhasil diperbarui!");
       setIsEditing(false);
-
-      // HAPUS: window.location.reload(); -> Tidak diperlukan lagi
     } catch (error: any) {
       console.error(error);
       toast.error("Gagal update: " + error.message);
@@ -103,7 +115,6 @@ export default function ProfilePage() {
       setIsSaving(false);
     }
   };
-
   const handleLogoutClick = () => setShowLogoutModal(true);
   const confirmLogout = () => {
     setShowLogoutModal(false);
