@@ -23,12 +23,12 @@ export const getSubjects = async (supabase: SupabaseClient) => {
 
 export const getReadingMaterials = async (
   supabase: SupabaseClient,
-  subjectId: string,
+  topicId: string,
 ) => {
   const { data, error } = await supabase
     .from("reading_materials")
     .select("*")
-    .eq("subject_id", subjectId)
+    .eq("topic_id", topicId)
     .order("order_number", { ascending: true });
 
   if (error) {

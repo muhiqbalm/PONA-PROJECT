@@ -38,27 +38,44 @@ export default function TeacherDashboardHome() {
 
       <main className="flex-1 w-full px-6 pb-8 pt-2 overflow-y-auto">
         {/* HERO / GREETING BANNER */}
-        <div className="relative w-full h-44 rounded-3xl overflow-hidden shadow-sm bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 flex items-center mb-6 z-0">
-          <div className="w-1/2 pl-6 z-10">
-            <h2 className="font-bold text-lg leading-tight text-black mb-2">
-              FunBio <br />
-              Digital Learning <br />
-              Media
+        <div className="relative w-full h-32 mb-4 flex-shrink-0 rounded-xl overflow-hidden shadow-sm bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 flex items-center z-0">
+          <div className="flex-1 pl-6 z-10">
+            <h2 className="font-black leading-tight text-lg mb-2">
+              FunBioLearn
             </h2>
-            <p className="text-xs text-gray-600 font-medium">
-              Suitable for <br /> Senior High School
+
+            <p className="text-sm font-bold">
+              Media Pembelajaran <br /> Digital Materi Biologi
             </p>
           </div>
 
-          <div className="absolute right-0 top-0 h-full w-2/5">
+          <div className="absolute right-0 top-[-10] h-full w-2/5">
             <Image
               src="/blood-cells.png"
               alt="Hero Banner"
               fill
               className="object-cover object-left"
             />
+
             <div className="absolute inset-0"></div>
           </div>
+        </div>
+
+        {/* INFO BOX */}
+        <div className="flex-shrink-0 mb-4 w-full bg-[#D4EDDA] rounded-xl p-3 flex items-center gap-3 border border-green-100/50">
+          <div className="flex-shrink-0 relative w-14 h-14">
+            <Image
+              src="/flash-cards.png"
+              alt="Info"
+              fill
+              className="object-contain"
+            />
+          </div>
+          <p className="text-[10px] sm:text-xs text-gray-900 font-medium leading-relaxed">
+            Media pembelajaran ini menggunakan strategi <i>scaffolding</i>{" "}
+            berupa <i>flashcard</i> yang tersedia pada menu mari belajar dan ayo
+            berlatih.
+          </p>
         </div>
 
         {/* SECTION TITLE */}
@@ -66,7 +83,6 @@ export default function TeacherDashboardHome() {
 
         {/* --- GRID MENU (1 KOLOM / FULL WIDTH) --- */}
         <div className="grid grid-cols-1 gap-4">
-          {" "}
           {/* UBAH: grid-cols-1 */}
           {/* Menu 1: Kelola Materi */}
           <Link href="/dashboard/materi" className="block w-full">
@@ -107,7 +123,7 @@ function DashboardMenuCardWide({
   iconBg: string;
 }) {
   return (
-    <div className="hover:shadow-slate-300 hover:shadow-md transitions bg-white p-5 rounded-3xl shadow-sm border border-transparent hover:border-gray-200 transition-all active:scale-[0.98] flex items-center justify-between w-full h-24 relative overflow-hidden">
+    <div className="hover:shadow-slate-300 hover:shadow-md transitions bg-white p-5 rounded-xl shadow-sm border border-transparent hover:border-gray-200 transition-all active:scale-[0.98] flex items-center justify-between w-full h-24 relative overflow-hidden">
       {/* Bagian Kiri: Icon & Teks */}
       <div className="flex items-center gap-4 z-10">
         {/* Icon Container */}

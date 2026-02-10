@@ -226,7 +226,7 @@ export default function ReviewPage() {
         {/* Tombol Kembali */}
         <div className="absolute top-2 left-6 z-10">
           <Link
-            href={`/materi/${idParam}`}
+            href={`/review-jawaban/${idParam}`}
             className="absolute top-0 p-2 rounded-full hover:bg-gray-200 transition"
           >
             <ArrowLeft className="w-6 h-6 text-black" strokeWidth={2.5} />
@@ -452,7 +452,7 @@ export default function ReviewPage() {
                   )}
                   <button
                     onClick={handleCloseModal}
-                    className="absolute top-4 right-4 z-20 p-1 bg-white/80 rounded-full"
+                    className="cursor-pointer absolute top-4 right-4 z-20 p-1 bg-white/80 rounded-full"
                   >
                     <X className="w-6 h-6" />
                   </button>

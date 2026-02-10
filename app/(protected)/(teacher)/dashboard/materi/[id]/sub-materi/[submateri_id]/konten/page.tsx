@@ -22,7 +22,7 @@ import {
   Layout,
   Hash,
   Link2,
-  MessageSquareText, // IMPORT ICON BARU DISINI
+  MessageSquareText,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
@@ -30,19 +30,17 @@ import Image from "next/image";
 import { useAuth } from "@/components/authProvider";
 import HomeHeader from "@/components/homeHeader";
 import { createClient } from "@/utils/supabase-client";
-import { getReadingMaterials } from "@/utils/supabase-queries";
 import { ContentBlock } from "@/app/(protected)/materi/[id]/page";
 
 // --- TYPES ---
 interface MaterialSlide {
   id?: string;
-  subject_id?: string;
+  topic_id?: string; // UBAH: subject_id -> topic_id
   title: string;
   content: ContentBlock[];
 }
 
-// ... (Bagian BlockMediaUploader tetap sama, tidak perlu diubah) ...
-
+// ... (Bagian BlockMediaUploader tetap sama) ...
 const BlockMediaUploader = ({
   type,
   src,
@@ -52,8 +50,6 @@ const BlockMediaUploader = ({
   src: string;
   onUpload: (url: string) => void;
 }) => {
-  // ... (Isi component BlockMediaUploader sama seperti sebelumnya) ...
-  // Biarkan kode ini seperti yang sebelumnya saya kirim
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
@@ -160,6 +156,13 @@ export default function GuruManageMateriPage() {
   const { user } = useAuth();
   const supabase = createClient();
 
+  // UBAH: Ambil topic_id dari params.submateri_id
+  // Pastikan struktur folder Anda adalah [id]/sub-materi/[submateri_id]/konten/page.tsx atau sejenisnya
+  // Agar params.submateri_id tersedia.
+  const topicId = params?.submateri_id ? String(params.submateri_id) : "";
+  // Jika masih error, cek console.log(params) untuk melihat nama parameter yang benar.
+
+  // Ambil subject_id untuk tombol back (jika perlu)
   const subjectId = params?.id ? String(params.id) : "";
 
   // --- STATE ---
@@ -180,14 +183,22 @@ export default function GuruManageMateriPage() {
   // --- FETCH DATA ---
   useEffect(() => {
     const fetchData = async () => {
-      if (!subjectId) return;
+      if (!topicId) return; // UBAH: Cek topicId
       setIsLoading(true);
       try {
-        const data = await getReadingMaterials(supabase, subjectId);
+        // UBAH: Fetch berdasarkan topic_id dari tabel reading_materials
+        const { data, error } = await supabase
+          .from("reading_materials")
+          .select("*")
+          .eq("topic_id", topicId) // UBAH: Filter by topic_id
+          .order("order_number", { ascending: true });
+
+        if (error) throw error;
+
         if (data && data.length > 0) {
           const formattedData = data.map((item: any) => ({
             id: item.id,
-            subject_id: item.subject_id,
+            topic_id: item.topic_id, // UBAH: Map topic_id
             title: item.title,
             content: (item.content || []).map((block: any) => {
               if (block.type === "image" || block.type === "video") {
@@ -205,17 +216,18 @@ export default function GuruManageMateriPage() {
           setSlides(formattedData);
         } else {
           setSlides([
-            { title: "Pendahuluan", content: [], subject_id: subjectId },
+            { title: "Pendahuluan", content: [], topic_id: topicId }, // UBAH: Inisialisasi dengan topic_id
           ]);
         }
       } catch (error) {
+        console.error(error);
         toast.error("Failed to load materials.");
       } finally {
         setIsLoading(false);
       }
     };
     fetchData();
-  }, [subjectId]);
+  }, [topicId, supabase]); // UBAH: Dependency topicId
 
   // --- ACTIONS ---
 
@@ -223,7 +235,7 @@ export default function GuruManageMateriPage() {
     const newSlide: MaterialSlide = {
       title: `Slide ${slides.length + 1}`,
       content: [],
-      subject_id: subjectId,
+      topic_id: topicId, // UBAH: Gunakan topicId
     };
     const newSlides = [...slides, newSlide];
     setSlides(newSlides);
@@ -235,19 +247,16 @@ export default function GuruManageMateriPage() {
     toast.success("New slide added");
   };
 
-  // 1. Handler saat tombol tong sampah diklik (Hanya membuka modal)
   const handleDeleteClick = () => {
     if (slides.length <= 1) return toast.error("Minimal 1 slide required.");
     setIsDeleteModalOpen(true);
   };
 
-  // 2. Handler Eksekusi Hapus (Dipanggil dari dalam modal)
   const confirmDeleteSlide = async () => {
     setIsDeleting(true);
     try {
       const slideToDelete = slides[currentSlideIndex];
 
-      // Hapus dari database jika sudah tersimpan (punya ID)
       if (slideToDelete.id) {
         const { error } = await supabase
           .from("reading_materials")
@@ -257,17 +266,15 @@ export default function GuruManageMateriPage() {
         if (error) throw error;
       }
 
-      // Update State Lokal
       const newSlides = slides.filter((_, i) => i !== currentSlideIndex);
       setSlides(newSlides);
 
-      // Sesuaikan index slide aktif
       if (currentSlideIndex >= newSlides.length) {
         setCurrentSlideIndex(newSlides.length - 1);
       }
 
       toast.success("Slide berhasil dihapus");
-      setIsDeleteModalOpen(false); // Tutup modal
+      setIsDeleteModalOpen(false);
     } catch (error) {
       console.error(error);
       toast.error("Gagal menghapus slide");
@@ -363,8 +370,9 @@ export default function GuruManageMateriPage() {
           return block;
         });
 
+        // UBAH: Payload menggunakan topic_id
         const payload = {
-          subject_id: subjectId,
+          topic_id: topicId, // UBAH: topic_id
           title: slide.title,
           content: cleanContent,
           order_number: index + 1,
@@ -401,21 +409,15 @@ export default function GuruManageMateriPage() {
     }
   };
 
-  // --- RENDER BLOCK EDITOR ---
   const renderBlockEditor = (
     block: ContentBlock & { source?: string },
     index: number,
   ) => {
-    // ... (Kode Render Block Editor Anda Tetap Sama - Saya persingkat untuk fokus ke Modal) ...
-    // Pastikan kode renderBlockEditor yang sebelumnya Anda miliki di-paste di sini
     return (
       <div
         key={index}
         className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-4 relative animate-in fade-in slide-in-from-bottom-2"
       >
-        {/* ... Isi komponen editor block ... */}
-        {/* Gunakan kode renderBlockEditor dari jawaban sebelumnya */}
-        {/* Header Controls */}
         <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <span className="bg-gray-100 text-gray-500 p-1.5 rounded-md">
@@ -456,19 +458,136 @@ export default function GuruManageMateriPage() {
             </button>
           </div>
         </div>
-        {/* Inputs... (Singkat untuk contoh, gunakan full code Anda) */}
+
         <div className="space-y-3">
-          {/* ... Logic Render Input ... */}
           {(block.type === "sub-header" || block.type === "paragraph") && (
             <textarea
               value={block.text}
               onChange={(e) => updateBlock(index, "text", e.target.value)}
               className={`w-full p-3 border border-gray-200 rounded-lg text-base focus:ring-2 focus:ring-violet-500 outline-none resize-none ${block.type === "sub-header" ? "font-bold h-14" : "h-32"}`}
+              placeholder={
+                block.type === "sub-header"
+                  ? "Enter sub-header..."
+                  : "Enter paragraph text..."
+              }
             />
           )}
-          {/* ... dst ... */}
-          {/* Note: Karena keterbatasan karakter di chat, pastikan Anda menggunakan logic renderBlockEditor lengkap Anda di sini */}
-          {/* Jika Anda copy paste langsung, bagian ini akan error karena logic render inputnya saya potong. Gunakan fungsi renderBlockEditor Anda yang lama, isinya tidak berubah. */}
+
+          {(block.type === "image" || block.type === "video") && (
+            <div className="space-y-3">
+              <BlockMediaUploader
+                type={block.type}
+                src={block.src || ""}
+                onUpload={(url) => updateBlock(index, "src", url)}
+              />
+              <input
+                type="text"
+                placeholder="Caption (optional)"
+                value={block.caption || ""}
+                onChange={(e) => updateBlock(index, "caption", e.target.value)}
+                className="w-full p-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-violet-300"
+              />
+              <input
+                type="text"
+                placeholder="Source/Credit (optional)"
+                value={block.source || ""}
+                onChange={(e) => updateBlock(index, "source", e.target.value)}
+                className="w-full p-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-violet-300 text-gray-500"
+              />
+            </div>
+          )}
+
+          {block.type === "bullet-list" && (
+            <div className="space-y-2">
+              {/* @ts-ignore */}
+              {(block.items || []).map((item: string, i: number) => (
+                <div key={i} className="flex gap-2 items-center">
+                  <span className="text-violet-500">•</span>
+                  <input
+                    type="text"
+                    value={item}
+                    onChange={(e) => {
+                      // @ts-ignore
+                      const newItems = [...block.items];
+                      newItems[i] = e.target.value;
+                      updateBlock(index, "items", newItems);
+                    }}
+                    className="flex-1 p-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-violet-300"
+                  />
+                  <button
+                    onClick={() => {
+                      // @ts-ignore
+                      const newItems = block.items.filter(
+                        (_, idx) => idx !== i,
+                      );
+                      updateBlock(index, "items", newItems);
+                    }}
+                    className="text-red-400 hover:text-red-600 p-1"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+              <button
+                // @ts-ignore
+                onClick={() =>
+                  updateBlock(index, "items", [
+                    ...(block.items || []),
+                    "New Item",
+                  ])
+                }
+                className="text-xs font-bold text-violet-600 hover:text-violet-700 flex items-center gap-1 mt-1"
+              >
+                <Plus size={12} /> Add Item
+              </button>
+            </div>
+          )}
+
+          {block.type === "green-list" && (
+            <div className="space-y-3 bg-green-50/50 p-3 rounded-xl border border-green-100">
+              <div className="flex gap-2">
+                <div className="w-10 flex-shrink-0">
+                  <label className="text-[10px] uppercase font-bold text-green-700">
+                    No.
+                  </label>
+                  <input
+                    type="number"
+                    // @ts-ignore
+                    value={block.number || 1}
+                    // @ts-ignore
+                    onChange={(e) =>
+                      updateBlock(index, "number", parseInt(e.target.value))
+                    }
+                    className="w-full p-2 border border-green-200 rounded-lg text-center font-bold text-green-700"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="text-[10px] uppercase font-bold text-green-700">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    // @ts-ignore
+                    value={block.title || ""}
+                    onChange={(e) =>
+                      updateBlock(index, "title", e.target.value)
+                    }
+                    className="w-full p-2 border border-green-200 rounded-lg font-bold"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] uppercase font-bold text-green-700">
+                  Description
+                </label>
+                <textarea
+                  value={block.text}
+                  onChange={(e) => updateBlock(index, "text", e.target.value)}
+                  className="w-full p-2 border border-green-200 rounded-lg text-sm h-20 resize-none"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -487,13 +606,13 @@ export default function GuruManageMateriPage() {
         <HomeHeader />
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
           <Link
-            href={`/dashboard/materi`}
+            // UBAH: Link Back ke list sub materi dari subject ini
+            href={`/dashboard/materi/${subjectId}/sub-materi`}
             className="p-2 -ml-2 rounded-full hover:bg-gray-100 text-gray-500"
           >
             <ArrowLeft size={22} />
           </Link>
           <div className="flex items-center gap-2">
-            {/* BUTTON DELETE - SEKARANG MEMANGGIL handleDeleteClick */}
             <button
               onClick={handleDeleteClick}
               className="cursor-pointer p-2 rounded-full text-red-500 hover:bg-red-50"
@@ -579,7 +698,6 @@ export default function GuruManageMateriPage() {
         </div>
       </div>
 
-      {/* --- MODAL ADD CONTENT (YANG LAMA) --- */}
       {isAddBlockModalOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-gray-900/60 backdrop-blur-sm sm:p-4 animate-in fade-in duration-200">
           <div
@@ -587,7 +705,6 @@ export default function GuruManageMateriPage() {
             onClick={() => setIsAddBlockModalOpen(false)}
           ></div>
           <div className="bg-white w-full sm:max-w-xl rounded-t-[2rem] sm:rounded-[2rem] p-8 shadow-2xl relative animate-in slide-in-from-bottom-12 zoom-in-95 duration-300 border border-gray-100">
-            {/* ... (Isi modal add content Anda yang sebelumnya) ... */}
             <div className="text-center mb-8 relative">
               <h3 className="text-xl font-bold text-gray-900">
                 Pilih Jenis Konten
@@ -644,12 +761,10 @@ export default function GuruManageMateriPage() {
         </div>
       )}
 
-      {/* --- MODAL DELETE (BARU & LEBIH BAGUS) --- */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl scale-100 animate-in zoom-in-95 duration-200 relative">
             <div className="flex flex-col items-center text-center">
-              {/* Icon Warning Besar */}
               <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mb-4">
                 <Trash2 className="text-red-500" size={28} />
               </div>

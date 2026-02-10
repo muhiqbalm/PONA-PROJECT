@@ -40,3 +40,10 @@ export interface RoleCodeData {
   role_name: string;
   created_at: string;
 }
+
+export type Topic = {
+  id: string;
+  subject_id: string;
+  name: string;
+  image: string | null; // URL gambar ikon topik
+};

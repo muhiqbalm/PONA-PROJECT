@@ -15,6 +15,8 @@ import {
   X,
   Power,
   AlertTriangle,
+  Book,
+  Target,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -185,11 +187,9 @@ export default function KelolaMateriPage() {
             filteredSubjects.map((subject, index) => (
               <div
                 key={subject.id}
-                // PERUBAHAN 1: Menghapus "opacity-75 grayscale" agar card tetap terlihat aktif/bisa diedit
-                // Saya ganti menjadi border-l-4 gray-300 untuk penanda visual halus jika non-aktif, opsional.
                 className={`bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col gap-4 relative overflow-hidden transition hover:shadow-md 
-                  ${!subject.is_active ? "bg-gray-50/30" : ""}
-                `}
+          ${!subject.is_active ? "bg-gray-50/30" : ""}
+        `}
               >
                 {/* Badge Status */}
                 {!subject.is_active && (
@@ -198,30 +198,35 @@ export default function KelolaMateriPage() {
                   </div>
                 )}
 
+                {/* --- PERBAIKAN DI SINI --- */}
                 <div
-                  className={`flex justify-between items-start z-10 ${!subject.is_active ? "mt-5" : ""}`}
+                  // 1. Tambahkan gap-4 untuk jarak paksa antara kiri dan kanan
+                  className={`flex justify-between items-start z-10 gap-4 ${
+                    !subject.is_active ? "mt-5" : ""
+                  }`}
                 >
-                  <div className="flex gap-3 items-center">
+                  {/* 2. Tambahkan flex-1 dan min-w-0 agar judul mengambil sisa ruang tapi tidak menabrak */}
+                  <div className="flex gap-3 items-center flex-1 min-w-0">
                     <div className="w-8 h-8 bg-green-50 rounded-full flex items-center justify-center text-green-700 font-black text-md shadow-inner shrink-0">
                       {index + 1}
                     </div>
 
-                    <div>
+                    <div className="min-w-0">
                       <h3 className="text-md font-bold text-gray-800 leading-tight line-clamp-2">
                         {subject.name}
                       </h3>
                     </div>
                   </div>
 
-                  {/* ACTION BUTTONS */}
-                  <div className="flex items-center gap-3">
+                  {/* 3. Tambahkan shrink-0 agar tombol tidak tergencet/mengecil */}
+                  <div className="flex items-center gap-3 shrink-0">
                     {/* TOGGLE SWITCH BUTTON */}
                     <button
                       onClick={() => handleToggleClick(subject)}
                       className={`
-                        relative w-12 h-7 rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 border border-transparent
-                        ${subject.is_active ? "bg-green-600" : "bg-gray-300"}
-                      `}
+                cursor-pointer relative w-12 h-7 rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 border border-transparent
+                ${subject.is_active ? "bg-green-600" : "bg-gray-300"}
+              `}
                       title={
                         subject.is_active
                           ? "Nonaktifkan Materi"
@@ -230,9 +235,9 @@ export default function KelolaMateriPage() {
                     >
                       <span
                         className={`
-                          absolute left-1 top-1 w-5 h-5 rounded-full shadow-sm transform transition-transform duration-200 ease-in-out border border-gray-200 bg-gray-100 
-                          ${subject.is_active ? "translate-x-5" : "translate-x-0"}
-                        `}
+                  absolute left-1 top-1 w-5 h-5 rounded-full shadow-sm transform transition-transform duration-200 ease-in-out border border-gray-200 bg-gray-100 
+                  ${subject.is_active ? "translate-x-5" : "translate-x-0"}
+                `}
                       />
                     </button>
 
@@ -244,18 +249,27 @@ export default function KelolaMateriPage() {
                     </button>
                   </div>
                 </div>
+                {/* --- AKHIR PERBAIKAN --- */}
 
                 <div className="h-px w-full bg-gray-50"></div>
 
                 {/* Menu Navigasi */}
-                {/* PERUBAHAN 2: Menghapus "pointer-events-none opacity-50" agar tombol tetap bisa diklik */}
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 grid-rows-2 gap-2">
                   <Link
-                    href={`/dashboard/materi/${subject.id}/materi-bacaan`}
+                    href={`/dashboard/materi/${subject.id}/tujuan`}
+                    className="flex flex-col items-center justify-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-600 p-2 rounded-xl transition active:scale-95"
+                  >
+                    <Target size={20} />
+                    <span className="text-[10px] font-bold">
+                      Tujuan Pembelajaran
+                    </span>
+                  </Link>
+                  <Link
+                    href={`/dashboard/materi/${subject.id}/sub-materi`}
                     className="flex flex-col items-center justify-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-600 p-2 rounded-xl transition active:scale-95"
                   >
-                    <BookOpen size={20} />
-                    <span className="text-[10px] font-bold">Bacaan</span>
+                    <Book size={20} />
+                    <span className="text-[10px] font-bold">Sub Materi</span>
                   </Link>
                   <Link
                     href={`/dashboard/materi/${subject.id}/soal-latihan`}

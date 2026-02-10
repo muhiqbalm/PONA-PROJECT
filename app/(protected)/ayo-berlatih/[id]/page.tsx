@@ -141,7 +141,7 @@ export default function LatihanSoalPage() {
     } else {
       // Jika Slide Terakhir (Tombol Submit ditekan)
       if (hasSubmitted) {
-        router.push(`/materi/${idParam}`);
+        router.push(`/ayo-berlatih`);
       } else {
         // VALIDASI: Cek apakah ada soal yang jawabannya kosong/spasi saja
         const hasEmptyAnswers = questions.some((q) => {
@@ -306,7 +306,7 @@ export default function LatihanSoalPage() {
                     hasSubmitted
                       ? "bg-gray-500 hover:bg-gray-600"
                       : "bg-red-700 hover:bg-red-600"
-                  }`}
+                  } ${!isSubmitting ? `cursor-pointer` : ``}`}
                 >
                   {isSubmitting ? (
                     <>
@@ -364,7 +364,7 @@ export default function LatihanSoalPage() {
                   )}
                   <button
                     onClick={handleCloseModal}
-                    className="absolute top-4 right-4 z-20 p-1 bg-white/80 rounded-full"
+                    className="cursor-pointer absolute top-4 right-4 z-20 p-1 bg-white/80 rounded-full"
                   >
                     <X className="w-6 h-6" />
                   </button>

@@ -11,7 +11,7 @@ export default function ProfilPengembangPage() {
 
       <header className="relative flex items-center justify-center px-6 pb-6 pt-2 bg-transparent">
         <Link
-          href="/about-us"
+          href="/"
           className="absolute left-6 top-5 -translate-y-1/2 p-2 -ml-2 rounded-full hover:bg-gray-200 transition"
         >
           <ArrowLeft className="w-6 h-6 text-black" strokeWidth={2.5} />

@@ -22,7 +22,7 @@ export default function HomeHeader() {
   }
 
   return (
-    <header className="w-full flex justify-between items-center py-4 px-6 bg-transparent">
+    <header className="w-full flex justify-between items-center py-1 px-6 bg-transparent">
       {/* --- BAGIAN KIRI: LOGO --- */}
       <div className="flex-shrink-0">
         <Link href={homeLink}>
@@ -69,11 +69,11 @@ export default function HomeHeader() {
         </Link>
 
         {/* Link About Us */}
-        <Link href="/about-us">
+        {/* <Link href="/about-us">
           <button className="cursor-pointer flex items-center justify-center text-black hover:text-gray-600 transition-colors">
             <Info className="w-7 h-7 stroke-[2]" />
           </button>
-        </Link>
+        </Link> */}
       </nav>
     </header>
   );
