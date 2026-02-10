@@ -87,7 +87,7 @@ export default function RegisterPage() {
           {/* Logo lebih kecil (w-16) di mobile karena input form lebih banyak */}
           <div className="relative w-16 h-16 mb-2 md:w-24 md:h-24">
             <Image
-              src="/funbioIcon.png"
+              src="/funbiolearn.png"
               alt="Fun Bio Logo"
               fill
               className="object-contain"

@@ -226,7 +226,7 @@ export default function ReviewPage() {
         {/* Tombol Kembali */}
         <div className="absolute top-2 left-6 z-10">
           <Link
-            href={`/review-jawaban/${idParam}`}
+            href={`/review-jawaban`}
             className="absolute top-0 p-2 rounded-full hover:bg-gray-200 transition"
           >
             <ArrowLeft className="w-6 h-6 text-black" strokeWidth={2.5} />

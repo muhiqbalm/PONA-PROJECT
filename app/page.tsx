@@ -83,7 +83,7 @@ export default function Home() {
     {
       title: "Profil Pengembang",
       imageSrc: "/profil-pengembang.png",
-      href: "/profil",
+      href: "/profil-pengembang",
     },
   ];
 

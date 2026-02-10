@@ -187,6 +187,20 @@ export default function MateriPage({
     }
   };
 
+  // --- HELPER FUNCTION UNTUK BOLD TEXT (**bold**) ---
+  const renderFormattedText = (text: string) => {
+    if (!text) return null;
+    return text.split(/(\*\*.*?\*\*)/g).map((part, index) =>
+      part.startsWith("**") && part.endsWith("**") ? (
+        <strong key={index} className="font-bold text-black">
+          {part.slice(2, -2)}
+        </strong>
+      ) : (
+        part
+      ),
+    );
+  };
+
   // --- RENDER HELPERS ---
   const renderSmartListItem = (item: string, index: number) => {
     const isStrip = item.trim().match(/^-\s/);
@@ -217,15 +231,8 @@ export default function MateriPage({
         className={`text-sm text-gray-700 leading-relaxed list-none ${containerClass}`}
       >
         {marker}
-        {cleanText.split(/(\*\*.*?\*\*)/g).map((part, p) =>
-          part.startsWith("**") && part.endsWith("**") ? (
-            <strong key={p} className="text-black font-semibold">
-              {part.slice(2, -2)}
-            </strong>
-          ) : (
-            part
-          ),
-        )}
+        {/* Menggunakan Helper */}
+        {renderFormattedText(cleanText)}
       </li>
     );
   };
@@ -261,7 +268,7 @@ export default function MateriPage({
 
           <div className="mt-12 text-center mb-10">
             <h1 className="text-2xl font-black text-gray-800 mb-2">
-              Flash Card
+              Scaffolding
             </h1>
             <p className="text-sm text-gray-500 max-w-xs mx-auto leading-relaxed">
               Buka kartu secara berurutan untuk membuka materi pembelajaran.
@@ -292,14 +299,14 @@ export default function MateriPage({
                     onClick={() => handleOpenCard(index)}
                     disabled={isLocked}
                     className={`
-                       relative w-16 h-16 rounded-full flex items-center justify-center text-2xl font-black transition-all duration-300 shadow-sm
-                        ${
-                          isCompleted
-                            ? " cursor-pointer bg-green-500 text-white shadow-green-200 hover:bg-green-600 scale-110 border-4 border-[#FAFAFA]"
-                            : isLocked
-                              ? "bg-gray-100 text-gray-300 border-2 border-gray-200 cursor-not-allowed"
-                              : " cursor-pointer bg-white text-gray-800 border-4 border-blue-100 hover:border-blue-400 hover:scale-105 cursor-pointer shadow-md"
-                        }
+                        relative w-16 h-16 rounded-full flex items-center justify-center text-2xl font-black transition-all duration-300 shadow-sm
+                         ${
+                           isCompleted
+                             ? " cursor-pointer bg-green-500 text-white shadow-green-200 hover:bg-green-600 scale-110 border-4 border-[#FAFAFA]"
+                             : isLocked
+                               ? "bg-gray-100 text-gray-300 border-2 border-gray-200 cursor-not-allowed"
+                               : " cursor-pointer bg-white text-gray-800 border-4 border-blue-100 hover:border-blue-400 hover:scale-105 cursor-pointer shadow-md"
+                         }
                         `}
                   >
                     {isCompleted ? (
@@ -368,7 +375,7 @@ export default function MateriPage({
                       />
                     ) : (
                       <span className="text-gray-400">
-                        Flash card tidak tersedia
+                        Scaffolding Card tidak tersedia
                       </span>
                     )}
                     <button
@@ -402,12 +409,12 @@ export default function MateriPage({
                       />
                     ) : (
                       <span className="text-gray-400">
-                        Flash card tidak tersedia
+                        Scaffolding Card tidak tersedia
                       </span>
                     )}
                     <button
                       onClick={handleCloseModal}
-                      className="absolute top-4 right-4 z-20 p-1 bg-white/80 rounded-full"
+                      className="cursor-pointer absolute top-4 right-4 z-20 p-1 bg-white/80 rounded-full"
                     >
                       <X className="w-6 h-6" />
                     </button>
@@ -476,7 +483,7 @@ export default function MateriPage({
 
         <div className="flex flex-col gap-5 max-w-lg mx-auto pb-6">
           {currentSlide.content?.map((block, index) => {
-            // Render Konten Materi (Sama seperti sebelumnya)
+            // Render Konten Materi
             if (block.type === "sub-header") {
               return (
                 <h2
@@ -489,22 +496,14 @@ export default function MateriPage({
               );
             }
             if (block.type === "paragraph") {
-              const parts = block.text.split(/(\*\*.*?\*\*)/g);
               return (
                 <p
                   key={index}
                   style={block.style}
                   className="text-sm text-gray-700 leading-relaxed whitespace-pre-line"
                 >
-                  {parts.map((part, i) =>
-                    part.startsWith("**") && part.endsWith("**") ? (
-                      <strong key={i} className="font-bold text-black">
-                        {part.slice(2, -2)}
-                      </strong>
-                    ) : (
-                      part
-                    ),
-                  )}
+                  {/* Menggunakan Helper */}
+                  {renderFormattedText(block.text)}
                 </p>
               );
             }
@@ -606,7 +605,8 @@ export default function MateriPage({
                     )}
                     {hasText && (
                       <div className="text-sm text-gray-700 leading-relaxed ">
-                        {block.text}
+                        {/* Menggunakan Helper */}
+                        {renderFormattedText(block.text)}
                       </div>
                     )}
                   </div>
@@ -636,7 +636,8 @@ export default function MateriPage({
                       key={i}
                       className="text-sm text-gray-700 pl-1 leading-relaxed "
                     >
-                      {item}
+                      {/* Menggunakan Helper */}
+                      {renderFormattedText(item)}
                     </li>
                   ))}
                 </ul>

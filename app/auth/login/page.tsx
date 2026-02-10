@@ -78,7 +78,7 @@ export default function LoginPage() {
         <div className="flex flex-col items-center text-center mb-6 md:mb-8 shrink-0">
           <div className="relative w-20 h-20 mb-2 md:w-24 md:h-24">
             <Image
-              src="/funbioIcon.png"
+              src="/funbiolearn.png"
               alt="Fun Bio Logo"
               fill
               className="object-contain"
