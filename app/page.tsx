@@ -56,7 +56,7 @@ export default function Home() {
 
   const menuItems = [
     {
-      title: "Panduan Penggunaan",
+      title: "Pedoman Pemanfaatan",
       imageSrc: "/panduan-penggunaan.png",
       href: panduanLink,
     },
