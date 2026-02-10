@@ -28,7 +28,7 @@ export default function HomeHeader() {
         <Link href={homeLink}>
           <div className="relative w-32 h-16">
             <Image
-              src="/funbioIcon.png"
+              src="/funbiolearn.png"
               alt="Fun Bio Logo"
               fill
               className="object-contain object-left"

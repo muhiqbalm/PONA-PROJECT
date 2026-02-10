@@ -8,8 +8,8 @@ import NextTopLoader from "nextjs-toploader";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "FUNBIO",
-  description: "Responsive mobile web view",
+  title: "FUNBIOLEARN | Media Pembelajaran Biologi Siswa SMA",
+  description: "Media Pembelajaran Biologi Siswa SMA",
 };
 
 export default function RootLayout({

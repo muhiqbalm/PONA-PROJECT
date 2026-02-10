@@ -146,7 +146,7 @@ export default function Home() {
         {/* SECTION TITLE */}
         <div className="flex-shrink-0 mt-1">
           <h3 className="font-extrabold text-base text-black">
-            Featured FunBio
+            Featured FunBioLearn
           </h3>
         </div>
 
