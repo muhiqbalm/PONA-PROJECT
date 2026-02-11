@@ -62,7 +62,7 @@ export default function AyoBerlatih() {
         {/* --- HEADER TITLE --- */}
         <div className="px-6 pb-4 flex items-center relative mb-4 pt-2">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push("/")}
             className="absolute left-6 hover:bg-gray-200 p-1 rounded-full active:bg-gray-200 transition cursor-pointer"
           >
             <ArrowLeft className="w-6 h-6 text-black" strokeWidth={2.5} />
