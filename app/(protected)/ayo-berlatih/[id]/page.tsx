@@ -207,7 +207,7 @@ export default function LatihanSoalPage() {
       <main className="flex-1 w-full px-6 pb-8 flex flex-col relative">
         <div className="absolute top-0 z-10">
           <Link
-            href={`/materi/${idParam}`}
+            href={`/ayo-berlatih`}
             className="absolute top-0 p-2 rounded-full hover:bg-gray-200 transition"
           >
             <ArrowLeft className="w-6 h-6 text-black" strokeWidth={2.5} />
