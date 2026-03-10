@@ -62,9 +62,7 @@ export default function ProfilePage() {
 
   const handleSaveEdit = async () => {
     if (!tempIdentity.trim()) {
-      toast.error(
-        isTeacher ? "NPP tidak boleh kosong!" : "Kelas tidak boleh kosong!",
-      );
+      toast.error(isTeacher ? "NIP" : "Kelas tidak boleh kosong!");
       return;
     }
     setIsSaving(true);
@@ -182,7 +180,7 @@ export default function ProfilePage() {
             </div>
             <div className="flex-1">
               <p className="text-xs text-gray-400 font-bold uppercase tracking-wide">
-                {isTeacher ? "NPP" : "Kelas"}
+                {isTeacher ? "NIP" : "Kelas"}
               </p>
 
               {isEditing ? (

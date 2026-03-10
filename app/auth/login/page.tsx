@@ -116,7 +116,7 @@ export default function LoginPage() {
             <input
               type="text"
               name="identitas"
-              placeholder="NPP (Guru) / Kelas (Siswa)"
+              placeholder="NIP (Guru) / Kelas (Siswa)"
               value={formData.identitas}
               onChange={handleChange}
               className="w-full bg-[#1E1E1E] text-white placeholder-gray-400/80 rounded-full px-5 py-3 md:px-6 md:py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-gray-800 transition-all"
