@@ -1,13 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import HomeHeader from "@/components/homeHeader";
-import Image from "next/image";
-import { Star } from "lucide-react";
-import Link from "next/link";
+import getUserDataFromCookie from "@/utils/getUserDataFromCookie";
 import { createClient } from "@/utils/supabase-client";
+import { Star } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
 
   // State untuk menyimpan link panduan yang dinamis
@@ -86,6 +89,19 @@ export default function Home() {
       href: "/profil-pengembang",
     },
   ];
+
+  // --- LOGIKA PROTEKSI HALAMAN (COOKIE BASED) ---
+  useEffect(() => {
+    const checkAuth = () => {
+      const userData = getUserDataFromCookie();
+
+      if (userData.role == "TEACHER") {
+        router.push("/dashboard");
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   // TAMPILKAN SKELETON JIKA LOADING
   if (loading) return <HomeSkeleton />;

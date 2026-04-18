@@ -18,26 +18,7 @@ import {
   Smartphone,
 } from "lucide-react";
 import HomeHeader from "@/components/homeHeader";
-
-// Fungsi helper untuk parsing cookie secara manual
-const getUserDataFromCookie = () => {
-  if (typeof document === "undefined") return null;
-
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; app_user_data=`);
-
-  if (parts.length === 2) {
-    try {
-      const cookieValue = parts.pop()?.split(";").shift();
-      if (!cookieValue) return null;
-      return JSON.parse(decodeURIComponent(cookieValue));
-    } catch (e) {
-      console.error("Gagal parsing cookie user data", e);
-      return null;
-    }
-  }
-  return null;
-};
+import getUserDataFromCookie from "@/utils/getUserDataFromCookie";
 
 export default function PanduanGuruPage() {
   const router = useRouter();
@@ -176,14 +157,14 @@ export default function PanduanGuruPage() {
         {/* Header Sticky */}
         <header className="sticky top-0 z-30 w-full flex items-center justify-center px-6 py-4 bg-[#FAFAFA]/95 backdrop-blur-sm border-b border-gray-100 shrink-0 mb-4 transition-all">
           <Link
-            href="/"
+            href="/dashboard"
             className="absolute left-6 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-gray-100 transition"
           >
-            <ArrowLeft className="w-6 h-6 text-black" strokeWidth={2.5} />
+            <ArrowLeft className="w-4 h-4 text-black" strokeWidth={2.5} />
           </Link>
 
           <div className="text-center">
-            <h1 className="text-lg md:text-xl font-bold text-black leading-tight">
+            <h1 className="text-lg font-bold text-black leading-tight">
               Pedoman Pemanfaatan Media
             </h1>
             <span className="text-[10px] bg-black text-white px-2 py-0.5 rounded-full mt-1 inline-block font-medium tracking-wide">

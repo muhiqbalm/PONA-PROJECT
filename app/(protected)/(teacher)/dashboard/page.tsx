@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/components/authProvider";
 import HomeHeader from "@/components/homeHeader";
-import { BookOpen, ChevronRight, Users } from "lucide-react"; // Ganti Star dgn ChevronRight agar lebih informatif untuk list view
+import { BookOpen, Users, User, FileText } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -81,27 +81,49 @@ export default function TeacherDashboardHome() {
         {/* SECTION TITLE */}
         <h3 className="font-bold text-lg text-black mb-4">Dashboard Guru</h3>
 
-        {/* --- GRID MENU (1 KOLOM / FULL WIDTH) --- */}
-        <div className="grid grid-cols-1 gap-4">
-          {/* UBAH: grid-cols-1 */}
-          {/* Menu 1: Kelola Materi */}
-          <Link href="/dashboard/materi" className="block w-full">
-            <DashboardMenuCardWide
-              title="Kelola Materi"
+        {/* --- GRID MENU (2 KOLOM / 2x2) --- */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Menu 4: Pedoman Pemanfaatan */}
+          <Link href="/panduan-penggunaan-guru" className="block w-full">
+            <DashboardMenuCardSquare
+              title="Pedoman Pemanfaatan"
+              description="Panduan penggunaan fitur"
               icon={
-                <BookOpen size={32} className="text-white" strokeWidth={2} />
+                <FileText size={24} className="text-white" strokeWidth={2} />
               }
-              description="Buat & atur materi pelajaran"
-              iconBg="bg-green-500" // Warna background icon
+              iconBg="bg-orange-500"
             />
           </Link>
+
+          {/* Menu 1: Kelola Materi */}
+          <Link href="/dashboard/materi" className="block w-full">
+            <DashboardMenuCardSquare
+              title="Kelola Materi"
+              description="Buat & atur materi pelajaran"
+              icon={
+                <BookOpen size={24} className="text-white" strokeWidth={2} />
+              }
+              iconBg="bg-green-500"
+            />
+          </Link>
+
           {/* Menu 2: Daftar Siswa */}
           <Link href="/dashboard/daftar-siswa" className="block w-full">
-            <DashboardMenuCardWide
+            <DashboardMenuCardSquare
               title="Daftar Siswa"
-              icon={<Users size={32} className="text-white" strokeWidth={2} />}
               description="Pantau data & progres siswa"
-              iconBg="bg-blue-500" // Warna background icon
+              icon={<Users size={24} className="text-white" strokeWidth={2} />}
+              iconBg="bg-blue-500"
+            />
+          </Link>
+
+          {/* Menu 3: Profil Pengembang */}
+          <Link href="/profil-pengembang" className="block w-full">
+            <DashboardMenuCardSquare
+              title="Profil Pengembang"
+              description="Informasi tim pembuat aplikasi"
+              icon={<User size={24} className="text-white" strokeWidth={2} />}
+              iconBg="bg-purple-500"
             />
           </Link>
         </div>
@@ -110,50 +132,40 @@ export default function TeacherDashboardHome() {
   );
 }
 
-// --- Komponen Card Baru (Mode Wide/Horizontal) ---
-function DashboardMenuCardWide({
+// --- Komponen Card Baru (Mode Square dengan Deskripsi) ---
+function DashboardMenuCardSquare({
   title,
-  icon,
   description,
+  icon,
   iconBg,
 }: {
   title: string;
-  icon: React.ReactNode;
   description: string;
+  icon: React.ReactNode;
   iconBg: string;
 }) {
   return (
-    <div className="hover:shadow-slate-300 hover:shadow-md transitions bg-white p-5 rounded-xl shadow-sm border border-transparent hover:border-gray-200 transition-all active:scale-[0.98] flex items-center justify-between w-full h-24 relative overflow-hidden">
-      {/* Bagian Kiri: Icon & Teks */}
-      <div className="flex items-center gap-4 z-10">
-        {/* Icon Container */}
-        <div
-          className={`w-14 h-14 ${iconBg} rounded-2xl flex items-center justify-center shadow-md`}
-        >
-          {icon}
-        </div>
-
-        {/* Teks */}
-        <div className="flex flex-col">
-          <span className="font-bold text-black text-lg leading-tight">
-            {title}
-          </span>
-          <span className="text-xs text-gray-500 font-medium mt-1">
-            {description}
-          </span>
-        </div>
-      </div>
-
-      {/* Bagian Kanan: Chevron (Indikator Klik) */}
-      <div className="z-10">
-        <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400">
-          <ChevronRight size={20} />
-        </div>
-      </div>
-
-      {/* Dekorasi Background Halus (Opsional) */}
+    <div className="hover:shadow-slate-300 hover:shadow-md transitions bg-white p-4 rounded-xl shadow-sm border border-transparent hover:border-gray-200 transition-all active:scale-[0.98] flex flex-col items-start justify-start w-full h-36 relative overflow-hidden gap-3">
+      {/* Icon Container */}
       <div
-        className={`absolute right-0 top-0 w-24 h-full bg-gradient-to-l from-gray-50 to-transparent opacity-50 z-0`}
+        className={`w-10 h-10 ${iconBg} rounded-xl flex items-center justify-center shadow-md z-10 shrink-0`}
+      >
+        {icon}
+      </div>
+
+      {/* Teks */}
+      <div className="flex flex-col z-10 w-full">
+        <span className="font-bold text-black text-[14px] sm:text-[15px] leading-tight mb-1">
+          {title}
+        </span>
+        <span className="text-[10px] sm:text-[11px] text-gray-500 font-medium leading-snug line-clamp-2">
+          {description}
+        </span>
+      </div>
+
+      {/* Dekorasi Background Halus di Pojok Kanan Atas */}
+      <div
+        className={`absolute -right-4 -top-4 w-16 h-16 ${iconBg} opacity-10 rounded-full z-0`}
       ></div>
     </div>
   );

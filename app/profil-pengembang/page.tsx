@@ -3,19 +3,23 @@
 import Link from "next/link";
 import { ArrowLeft, GraduationCap, Building2, Award } from "lucide-react";
 import HomeHeader from "@/components/homeHeader";
+import { useRouter } from "next/navigation";
 
 export default function ProfilPengembangPage() {
+  const router = useRouter();
   return (
     <div className="flex flex-col min-h-screen bg-[#FAFAFA] font-sans">
       <HomeHeader />
 
       <header className="relative flex items-center justify-center px-6 pb-6 pt-2 bg-transparent">
-        <Link
-          href="/"
-          className="absolute left-6 top-5 -translate-y-1/2 p-2 -ml-2 rounded-full hover:bg-gray-200 transition"
+        <button
+          onClick={() => router.back()}
+          className="cursor-pointer absolute left-6 top-5 -translate-y-1/2 p-2 -ml-2 rounded-full hover:bg-gray-200 transition"
+          type="button"
+          aria-label="Kembali"
         >
           <ArrowLeft className="w-6 h-6 text-black" strokeWidth={2.5} />
-        </Link>
+        </button>
         <h1 className="text-xl font-bold text-black">Profil Pengembang</h1>
       </header>
 

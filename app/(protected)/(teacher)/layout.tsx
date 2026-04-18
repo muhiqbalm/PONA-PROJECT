@@ -25,7 +25,7 @@ export default function TeacherLayout({
       // 3. Cek Role khusus TEACHER
       if (user.role !== "TEACHER") {
         // Jika siswa mencoba masuk halaman guru, lempar ke dashboard siswa atau unauthorized
-        router.push("/dashboard/siswa");
+        router.push("/");
         // atau router.push("/unauthorized");
       }
     }
