@@ -121,7 +121,7 @@ export default function TeacherDashboardHome() {
           <Link href="/profil-pengembang" className="block w-full">
             <DashboardMenuCardSquare
               title="Profil Pengembang"
-              description="Informasi tim pembuat aplikasi"
+              description="Informasi pengembang aplikasi"
               icon={<User size={24} className="text-white" strokeWidth={2} />}
               iconBg="bg-purple-500"
             />
