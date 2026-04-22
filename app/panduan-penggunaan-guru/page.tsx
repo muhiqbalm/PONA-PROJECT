@@ -12,10 +12,11 @@ import {
   Users,
   ShieldAlert,
   Loader2,
-  // Icon baru untuk Profil
   Code2,
   Dna,
   Smartphone,
+  UserPlus, // Tambahan icon untuk Registrasi
+  LogIn, // Tambahan icon untuk Login
 } from "lucide-react";
 import HomeHeader from "@/components/homeHeader";
 import getUserDataFromCookie from "@/utils/getUserDataFromCookie";
@@ -83,6 +84,26 @@ export default function PanduanGuruPage() {
   const teacherGuides = [
     {
       step: "01",
+      title: "Registrasi",
+      description:
+        "Klik ikon profil di halaman utama untuk mendaftar/login/melihat profil Anda. Isilah semua kolom sesuai dengan identitas Anda. Simpan informasi pendaftaran untuk login. Jika sudah mengisi semua identitas, maka klik register untuk mendaftar.",
+      icon: UserPlus,
+      gradient: "from-emerald-500 to-green-500",
+      bgIcon: "bg-emerald-50",
+      textIcon: "text-emerald-600",
+    },
+    {
+      step: "02",
+      title: "Login",
+      description:
+        "Isilah setiap kolom sesuai dengan identitas yang Anda gunakan saat daftar. Anda perlu memasukkan kode guru untuk mengakses web sebagai guru.",
+      icon: LogIn,
+      gradient: "from-fuchsia-500 to-pink-500",
+      bgIcon: "bg-fuchsia-50",
+      textIcon: "text-fuchsia-600",
+    },
+    {
+      step: "03",
       title: "Kelola Subjek Materi",
       description:
         "Menambahkan topik pembelajaran baru atau mengedit judul subjek materi yang sudah ada.",
@@ -92,7 +113,7 @@ export default function PanduanGuruPage() {
       textIcon: "text-blue-700",
     },
     {
-      step: "02",
+      step: "04",
       title: "Kelola Bacaan & Media",
       description:
         "Menyusun materi bacaan. Anda dapat menyisipkan teks, gambar, dan video visual untuk memperkaya materi.",
@@ -102,7 +123,7 @@ export default function PanduanGuruPage() {
       textIcon: "text-cyan-600",
     },
     {
-      step: "03",
+      step: "05",
       title: "Bank Soal & Flash Card",
       description:
         "Membuat soal latihan interaktif. Tambahkan fitur Flash Card (Flip), Kunci Jawaban, dan Rubrik Skor.",
@@ -112,7 +133,7 @@ export default function PanduanGuruPage() {
       textIcon: "text-violet-700",
     },
     {
-      step: "04",
+      step: "06",
       title: "Review Jawaban Siswa",
       description:
         "Memantau progres pengerjaan siswa. Anda dapat melihat jawaban asli siswa dan memberikan review/koreksi.",
@@ -122,7 +143,7 @@ export default function PanduanGuruPage() {
       textIcon: "text-amber-600",
     },
     {
-      step: "05",
+      step: "07",
       title: "Data Kelas & Siswa",
       description:
         "Melihat daftar lengkap siswa yang terdaftar, dikelompokkan berdasarkan kelas masing-masing.",
