@@ -95,7 +95,7 @@ export default function Home() {
     const checkAuth = () => {
       const userData = getUserDataFromCookie();
 
-      if (userData.role == "TEACHER") {
+      if (userData?.role == "TEACHER") {
         router.push("/dashboard");
       }
     };
