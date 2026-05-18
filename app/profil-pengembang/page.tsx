@@ -1,12 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, GraduationCap, Building2, Award } from "lucide-react";
+import {
+  ArrowLeft,
+  GraduationCap,
+  Building2,
+  Award,
+  Users,
+} from "lucide-react";
 import HomeHeader from "@/components/homeHeader";
 import { useRouter } from "next/navigation";
 
 export default function ProfilPengembangPage() {
   const router = useRouter();
+
   return (
     <div className="flex flex-col min-h-screen bg-[#FAFAFA] font-sans">
       <HomeHeader />
@@ -78,6 +85,23 @@ export default function ProfilPengembangPage() {
                     Fakultas Ilmu Pendidikan
                     <br />
                     Universitas Negeri Malang
+                  </p>
+                </div>
+              </div>
+
+              {/* Bagian Tambahan Dosen Pembimbing */}
+              <div className="flex items-start gap-3">
+                <div className="bg-white p-1.5 rounded-full shadow-sm text-blue-500 mt-0.5">
+                  <Users size={16} />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 font-semibold">
+                    Dosen Pembimbing
+                  </p>
+                  <p className="text-sm text-gray-700 font-medium leading-relaxed">
+                    1. Dr. Made Duananda Kartika Degeng, M.Pd.
+                    <br />
+                    2. Dr. Fikri Aulia, M.Pd.
                   </p>
                 </div>
               </div>
